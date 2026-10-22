@@ -1,0 +1,58 @@
+# 依存の版を固定する（PyPI に届かない環境でも作れるよう、GitHub Actions に作らせる）.
+#
+# - main 以外のブランチで requirements.txt・examples/pyproject.toml（またはこのファイル）を変えて push したとき、
+#   または手で動かしたときに走る
+# - requirements.txt から、uv（版を固定）で間接的な依存まで含めた constraints.txt をハッシュ付きで作る
+#   （pip install --require-hashes -r constraints.txt で使う. 中身が書き換えられた配布物は入らない）
+# - examples/pyproject.toml から examples/uv.lock を作り直す（uv.lock はハッシュを含む）
+# - 変わっていれば同じブランチにコミットして push する. GITHUB_TOKEN のコミットでは CI が走らないので、次の変更を push して CI を回す
+name: deps-lock
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - requirements.txt
+      - examples/pyproject.toml
+      - .github/workflows/deps-lock.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deps-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # このジョブだけ書き込みが要る（constraints.txt と uv.lock をブランチにコミットして push するため）
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # push するために認証情報を残す（このジョブは外部のコードを動かさない. 入れるのは版を固定した uv だけ）
+          persist-credentials: true
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install "uv==0.8.17"
+      - name: constraints.txt を作る
+        run: |
+          uv pip compile requirements.txt --universal --python-version 3.12 --generate-hashes \
+            --no-header --no-annotate -o constraints.txt
+          sed -i '1i # 自動生成（.github/workflows/deps-lock.yml）. 手で書き換えない. pip install --require-hashes -r constraints.txt で使う' constraints.txt
+          cat constraints.txt
+      - name: examples/uv.lock を作る
+        run: uv lock --project examples
+      - name: 変わっていればコミットして push する
+        run: |
+          git add constraints.txt examples/uv.lock
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "依存: constraints.txt と examples/uv.lock を更新（deps-lock）"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
