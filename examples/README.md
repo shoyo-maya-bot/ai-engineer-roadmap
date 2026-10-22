@@ -17,6 +17,8 @@ uv run api-to-csv --help
 | `src/roadmap_examples/llm.py` | 06 以降 | LLM を呼ぶ部分のインターフェース（`LLMClient`）と、テスト用の偽の実装（`FakeLLM`）・呼び出し回数の上限（`LimitedLLM`） |
 | `src/roadmap_examples/ollama_client.py` | 07 以降 | ローカルの LLM（Ollama）を呼ぶ本物の実装（会話・構造化出力・ツール使用・エンベディング） |
 | `src/roadmap_examples/evalset.py` | 07 以降 | 評価セット（JSONL）の読み書き・採点・前回の結果との比較 |
+| `src/roadmap_examples/p07_*.py` | 07 | プロンプトの組み立て・構造化出力の検証・ツール使用・費用の上限とキャッシュ・成果物（分類の比較） |
+| `data/p07/inquiries.jsonl` | 07 | 07 の評価セット（架空の問い合わせ 30 件） |
 | `src/roadmap_examples/p08_*.py` | 08 | 文書の取り込み（PDF・Excel）・チャンク分割・検索（ベクトル・BM25・RRF・並べ替え）・出典つきの Q&A・検索と生成を分けた評価 |
 | `data/p08/` | 08 | 08 の題材（架空の設計書）と評価セット（14 問） |
 

@@ -71,7 +71,19 @@ nav:
       - 05 ディープラーニング: 05-deep-learning/index.md
   - LLM 応用:
       - 06 LLM の基礎: 06-llm-basics/index.md
-      - 07 プロンプトと API: 07-prompt-api/index.md
+      - 07 プロンプトと API:
+          - 07-prompt-api/index.md
+          - 07-1 プロンプトの設計: 07-prompt-api/07-1-prompt-design.md
+          - 07-2 構造化出力とスキーマ検証: 07-prompt-api/07-2-structured-output.md
+          - 07-3 関数呼び出しとツール使用: 07-prompt-api/07-3-tool-use.md
+          - 07-4 費用の最適化: 07-prompt-api/07-4-cost.md
+          - 07-5 小さな評価セットを最初に作る: 07-prompt-api/07-5-eval-set.md
+          - 解答:
+              - 07-1 解答: 07-prompt-api/answers/07-1.md
+              - 07-2 解答: 07-prompt-api/answers/07-2.md
+              - 07-3 解答: 07-prompt-api/answers/07-3.md
+              - 07-4 解答: 07-prompt-api/answers/07-4.md
+              - 07-5 解答: 07-prompt-api/answers/07-5.md
       - 08 RAG とベクトルデータベース:
           - 08-rag/index.md
           - 08-1 文書の取り込み: 08-rag/08-1-ingest.md
