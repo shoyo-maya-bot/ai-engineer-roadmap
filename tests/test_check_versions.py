@@ -71,6 +71,14 @@ def test_versions_in_code_blocks_and_comments_are_allowed(repo):
     assert errors(repo) == []
 
 
+def test_versions_in_multiline_comments_are_allowed(repo):
+    # 後退: 改行をまたぐ HTML コメントの中を本文として検査していた
+    repo.write("docs/index.md", "# はじめに\n\n<!--\nPython 3.12 のメモ\n-->\n\n本文 <!-- uv 0.8\nの話 --> です\n")
+    assert errors(repo) == []
+    repo.write("docs/index.md", "# はじめに\n\n<!-- メモ -->Python 3.12 です\n")
+    assert len(errors(repo)) == 1
+
+
 def test_macros_need_front_matter_and_known_names(repo):
     repo.write("docs/index.md", "# はじめに\n\nPython {{ versions.python }}\n")
     assert errors(repo) == ["index.md: {{ versions.* }} を使っているのに、先頭に render_macros: true がありません"]
