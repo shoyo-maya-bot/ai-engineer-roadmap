@@ -8,7 +8,11 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
 # 実行に使う依存. 部が進むと足す（足したら uv lock で uv.lock を更新する）
-dependencies = []
+dependencies = [
+    "numpy>=2.3",       # 08: エンベディングのベクトル検索
+    "openpyxl>=3.1.5",  # 08: Excel の取り込み
+    "pypdf>=6.1",       # 08: PDF の取り込み
+]
 
 [project.scripts]
 api-to-csv = "roadmap_examples.p01_api_to_csv:main"
