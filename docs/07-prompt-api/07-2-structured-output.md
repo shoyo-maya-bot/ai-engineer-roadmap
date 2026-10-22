@@ -115,6 +115,13 @@ def validate(value: Any, schema: dict[str, Any], path: str = "$") -> list[str]:
 
 <!-- src: examples/src/roadmap_examples/p07_structured.py -->
 ```python title="examples/src/roadmap_examples/p07_structured.py"
+def ask_json(
+    llm: LLMClient, messages: Sequence[Message], schema: dict[str, Any], max_attempts: int = 2
+) -> StructuredResult:
+    """JSON で答えさせ、スキーマで確かめる. 合わなければ誤りを伝えて頼み直す（合計 max_attempts 回まで）."""
+    history = list(messages)
+    tokens_in = tokens_out = 0
+    text = ""
     for attempt in range(1, max_attempts + 1):
         result = llm.complete(history)
         tokens_in += result.input_tokens

@@ -58,6 +58,7 @@ Ollama のチャットの API には、`tools` に次の形で渡します（[�
 
 <!-- src: examples/src/roadmap_examples/p07_tools.py -->
 ```python title="examples/src/roadmap_examples/p07_tools.py"
+SUPPORT_TOOLS = [
     Tool(
         "get_order_status",
         "注文番号から、注文の状態（発送済み・準備中など）と発送日を調べる",
@@ -69,6 +70,18 @@ Ollama のチャットの API には、`tools` に次の形で渡します（[�
         },
         get_order_status,
     ),
+    Tool(
+        "search_faq",
+        "よくある質問から、キーワードに合う回答を探す",
+        {
+            "type": "object",
+            "properties": {"keyword": {"type": "string", "description": "探す語（例: 領収書）", "minLength": 1}},
+            "required": ["keyword"],
+            "additionalProperties": False,
+        },
+        search_faq,
+    ),
+]
 ```
 
 ツール使用に対応していないモデルもあります。Ollama のモデルの一覧では、
