@@ -1,0 +1,35 @@
+# 演習のコード（教材の本文が引用する実物）. 版は uv.lock で固定する（uv sync --locked）.
+# Python の版・pytest・ruff の版は mkdocs.yml の extra.versions と同じにする（scripts/check_versions.py が照合する）.
+[project]
+name = "roadmap-examples"
+version = "0.1.0"
+description = "AI エンジニア学習ロードマップの演習のコード"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+# 実行に使う依存. 部が進むと足す（足したら uv lock で uv.lock を更新する）
+dependencies = []
+
+[project.scripts]
+api-to-csv = "roadmap_examples.p01_api_to_csv:main"
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "ruff==0.16.10",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
