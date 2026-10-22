@@ -1,0 +1,21 @@
+# examples（演習のコード）
+
+教材の本文が引用する、実行できるコードの置き場所です。本文のコードはここからの引用で、
+`scripts/check_code_quotes.py`（CI）が一致を確かめます。
+
+```bash
+cd examples
+uv sync --locked      # 固定した版で入れる（.venv を作る）
+uv run pytest         # テスト（LLM もネットワークも使わない）
+uv run ruff check . && uv run ruff format --check .
+uv run api-to-csv --help
+```
+
+| ファイル | 部 | 内容 |
+|---|---|---|
+| `src/roadmap_examples/p01_api_to_csv.py` | 01 | 公開 API から JSON を取り、CSV にする CLI の雛形 |
+| `src/roadmap_examples/llm.py` | 06 以降 | LLM を呼ぶ部分のインターフェース（`LLMClient`）と、テスト用の偽の実装（`FakeLLM`）・呼び出し回数の上限（`LimitedLLM`） |
+
+- ファイル名は `p<部の番号>_<内容>.py`。テストは `tests/test_<同じ名前>.py`
+- LLM やネットワークを使う部分はインターフェースにして、テストでは偽の実装に差し替える。
+  `tests/conftest.py` がテスト中のネットワーク接続を止めるので、うっかり本物を呼ぶとテストが失敗する

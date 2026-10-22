@@ -1,0 +1,7 @@
+# scripts/・tests/ の静的解析と書式（examples/ は examples/pyproject.toml の設定を使う）
+line-length = 120
+target-version = "py312"
+extend-exclude = ["site"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]

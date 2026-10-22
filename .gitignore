@@ -1,0 +1,19 @@
+# サイトの出力・仮想環境・キャッシュ
+site/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.cache/
+*.egg-info/
+dist/
+links-report.md
+
+# 秘密情報（.env.example を写して使う. コミットしない）
+.env
+.env.*
+!.env.example
+
+# ノートブックの途中のファイル・ローカルのモデルやデータ
+.ipynb_checkpoints/
+*.gguf

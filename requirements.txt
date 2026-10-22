@@ -1,0 +1,9 @@
+# サイトの生成と検査スクリプトのテストに使うもの（範囲で書く）. 実際に入れる版は constraints.txt で固定する
+# （.github/workflows/deps-lock.yml がハッシュ付きで自動で作る）.
+#   pip install --require-hashes -r constraints.txt
+# 演習のコード（examples/）の依存は examples/pyproject.toml と examples/uv.lock で別に管理する.
+mkdocs>=1.6.1,<2
+mkdocs-material>=9.7.7,<10
+mkdocs-macros-plugin>=1.5.0,<2
+# 版は examples/pyproject.toml と同じにする（scripts/check_versions.py が照合する）
+pytest==9.1.1

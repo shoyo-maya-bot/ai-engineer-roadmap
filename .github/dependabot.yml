@@ -1,0 +1,17 @@
+# 依存の更新を月 1 回、PR で提案する（マージ前に CI とレビューを通す）.
+# 版を上げたら mkdocs.yml の extra.versions も合わせる（scripts/check_versions.py が照合する）
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: monthly}
+  # サイトの生成と検査（requirements.txt）
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: monthly}
+    open-pull-requests-limit: 5
+  # 演習のコード（examples/pyproject.toml と uv.lock）
+  - package-ecosystem: uv
+    directory: /examples
+    schedule: {interval: monthly}
+    open-pull-requests-limit: 5
