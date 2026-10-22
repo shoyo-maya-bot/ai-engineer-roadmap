@@ -1,0 +1,81 @@
+site_name: AI エンジニア学習ロードマップ（Python）
+site_description: 業務開発の経験がある人が、Python・機械学習・LLM・RAG・エージェント・運用までを順に学び、AI システムを作って本番で動かせるようになる教材
+site_url: https://shoyo-maya-bot.github.io/ai-engineer-roadmap/
+repo_url: https://github.com/shoyo-maya-bot/ai-engineer-roadmap
+edit_uri: edit/main/docs/
+docs_dir: docs
+theme:
+  name: material
+  language: ja
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/weather-night, name: ダークモード}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/weather-sunny, name: ライトモード}
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+plugins:
+  - search:
+      lang: ja
+  # 本文の版を extra.versions の 1 か所にまとめ、{{ versions.xxx }} で参照する.
+  # {{ }} を書くページだけで展開する（先頭に render_macros: true）. Jinja などの {{ }} を含むコード例を壊さないため
+  - macros:
+      render_by_default: false
+      on_undefined: strict
+      on_error_fail: true
+# 本文に書く版. 演習のコード（examples/）で実際に使う版と同じにする.
+# scripts/check_versions.py（CI）が examples/pyproject.toml・examples/.python-version・examples/uv.lock・
+# .github/workflows の uv の版と照合し、本文に直接書いた版（「Python 3.12」など）を検出する.
+extra:
+  versions:
+    python: "3.12"
+    uv: "0.8.17"
+    pytest: "9.1.1"
+    ruff: "0.16.10"
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+nav:
+  - はじめに: index.md
+  - 学び方: guide.md
+  - 基礎:
+      - 01 Python と基礎: 01-python/index.md
+      - 02 AI のための数学: 02-math/index.md
+      - 03 データエンジニアリング: 03-data/index.md
+  - 機械学習・深層学習:
+      - 04 機械学習: 04-ml/index.md
+      - 05 ディープラーニング: 05-deep-learning/index.md
+  - LLM 応用:
+      - 06 LLM の基礎: 06-llm-basics/index.md
+      - 07 プロンプトと API: 07-prompt-api/index.md
+      - 08 RAG とベクトルデータベース: 08-rag/index.md
+      - 09 ファインチューニングと最適化: 09-finetuning/index.md
+      - 10 AI エージェント: 10-agents/index.md
+  - 安全・運用・実践:
+      - 11 AI の安全と評価: 11-safety/index.md
+      - 12 MLOps とデプロイ: 12-mlops/index.md
+      - 13 実践プロジェクト: 13-project/index.md
