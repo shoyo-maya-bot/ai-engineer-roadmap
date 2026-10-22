@@ -1,0 +1,14 @@
+{"id": "q01", "input": "備品は何日間借りられますか？", "expected": {"sources": ["04-data.md"], "keywords": ["14 日"]}, "tags": ["基本"]}
+{"id": "q02", "input": "返却期限は何回まで延ばせますか？延ばすと何日増えますか？", "expected": {"sources": ["04-data.md"], "keywords": ["1 回", "7 日"]}, "tags": ["基本"]}
+{"id": "q03", "input": "API のアクセストークンは何分で切れますか？", "expected": {"sources": ["02-api.md"], "keywords": ["30 分"]}, "tags": ["基本"]}
+{"id": "q04", "input": "API は 1 分間に何回まで呼べますか？", "expected": {"sources": ["02-api.md"], "keywords": ["60 回"]}, "tags": ["基本"]}
+{"id": "q05", "input": "API を呼びすぎたら、どんな応答が返りますか？", "expected": {"sources": ["02-api.md"], "keywords": ["429", "Retry-After"]}, "tags": ["言い換え"]}
+{"id": "q06", "input": "返却期限が近いことを知らせるメールは、何時に送られますか？", "expected": {"sources": ["03-batch.md"], "keywords": ["2:00"]}, "tags": ["言い換え"]}
+{"id": "q07", "input": "夜間のバッチが失敗したら、どうなりますか？", "expected": {"sources": ["03-batch.md"], "keywords": ["30 分後", "再実行"]}, "tags": ["基本"]}
+{"id": "q08", "input": "バッチのログは何日残りますか？", "expected": {"sources": ["03-batch.md"], "keywords": ["90 日"]}, "tags": ["基本"]}
+{"id": "q09", "input": "1 人で同時にいくつまで借りられますか？", "expected": {"sources": ["04-data.md"], "keywords": ["5 点"]}, "tags": ["基本"]}
+{"id": "q10", "input": "夜中に API を呼ぶとどうなりますか？", "expected": {"sources": ["01-overview.md"], "keywords": ["503"]}, "tags": ["言い換え"]}
+{"id": "q11", "input": "延滞の集計は何時に動き、どのテーブルのどの列を見ていますか？", "expected": {"sources": ["03-batch.md", "04-data.md"], "keywords": ["3:00", "loans", "returned_on"]}, "tags": ["複数の文書"]}
+{"id": "q12", "input": "エラーコード E-302 は、どんなときに返りますか？", "expected": {"sources": ["02-api.md"], "keywords": ["貸し出し中"]}, "tags": ["基本"]}
+{"id": "q13", "input": "備品を買うときの承認の流れを教えてください。", "expected": {"sources": [], "keywords": []}, "tags": ["資料に無い"]}
+{"id": "q14", "input": "この画面は、どのブラウザに対応していますか？", "expected": {"sources": [], "keywords": []}, "tags": ["資料に無い"]}

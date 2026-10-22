@@ -84,7 +84,17 @@ nav:
               - 07-3 解答: 07-prompt-api/answers/07-3.md
               - 07-4 解答: 07-prompt-api/answers/07-4.md
               - 07-5 解答: 07-prompt-api/answers/07-5.md
-      - 08 RAG とベクトルデータベース: 08-rag/index.md
+      - 08 RAG とベクトルデータベース:
+          - 08-rag/index.md
+          - 08-1 文書の取り込み: 08-rag/08-1-ingest.md
+          - 08-2 チャンク分割とエンベディング: 08-rag/08-2-chunk-embedding.md
+          - 08-3 ベクトル検索・ハイブリッド検索・並べ替え: 08-rag/08-3-search.md
+          - 08-4 RAG の評価: 08-rag/08-4-rag-eval.md
+          - 解答:
+              - 08-1 解答: 08-rag/answers/08-1.md
+              - 08-2 解答: 08-rag/answers/08-2.md
+              - 08-3 解答: 08-rag/answers/08-3.md
+              - 08-4 解答: 08-rag/answers/08-4.md
       - 09 ファインチューニングと最適化: 09-finetuning/index.md
       - 10 AI エージェント: 10-agents/index.md
   - 安全・運用・実践:
