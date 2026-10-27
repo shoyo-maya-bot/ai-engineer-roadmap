@@ -96,7 +96,19 @@ nav:
               - 08-3 解答: 08-rag/answers/08-3.md
               - 08-4 解答: 08-rag/answers/08-4.md
       - 09 ファインチューニングと最適化: 09-finetuning/index.md
-      - 10 AI エージェント: 10-agents/index.md
+      - 10 AI エージェント:
+          - 10-agents/index.md
+          - 10-1 エージェントのループとワークフローの違い: 10-agents/10-1-loop-vs-workflow.md
+          - 10-2 メモリと状態の管理: 10-agents/10-2-memory-state.md
+          - 10-3 MCP でツールをつなぐ: 10-agents/10-3-mcp.md
+          - 10-4 人の承認・回数と費用の上限: 10-agents/10-4-approval-limits.md
+          - 10-5 AI コーディング支援を開発で使う: 10-agents/10-5-ai-coding.md
+          - 解答:
+              - 10-1 解答: 10-agents/answers/10-1.md
+              - 10-2 解答: 10-agents/answers/10-2.md
+              - 10-3 解答: 10-agents/answers/10-3.md
+              - 10-4 解答: 10-agents/answers/10-4.md
+              - 10-5 解答: 10-agents/answers/10-5.md
   - 安全・運用・実践:
       - 11 AI の安全と評価: 11-safety/index.md
       - 12 MLOps とデプロイ: 12-mlops/index.md
