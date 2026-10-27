@@ -1,0 +1,8 @@
+{"id": "q01", "input": "日本の首都はどこですか？一言で答えてください。", "expected": {"keywords": ["東京"]}, "tags": ["日本語", "知識"]}
+{"id": "q02", "input": "What is the capital of Japan? Answer in one word.", "expected": {"keywords": ["Tokyo"]}, "tags": ["英語", "知識"]}
+{"id": "q03", "input": "定価 1,200 円の品物を 3 割引で 2 個買うと、合計はいくらですか？", "expected": {"keywords": ["1680"]}, "tags": ["日本語", "計算"]}
+{"id": "q04", "input": "An item costs 1,200 yen. With a 30% discount, how much do 2 items cost in total?", "expected": {"keywords": ["1680"]}, "tags": ["英語", "計算"]}
+{"id": "q05", "input": "次の文を 30 字以内で要約してください。「備品の貸出期間は 14 日で、1 回だけ 7 日延長できます。延滞している人は新しく借りられません。」", "expected": {"keywords": ["14"]}, "tags": ["日本語", "要約"]}
+{"id": "q06", "input": "次の問い合わせは billing・contract・technical・other のどれに当たりますか？1 語で答えてください。「先月の請求書を再発行してほしいです。」", "expected": {"keywords": ["billing"]}, "tags": ["日本語", "分類"]}
+{"id": "q07", "input": "架空の会社「みなと備品サービス」の 2026 年の売上高はいくらですか？", "expected": {"keywords": []}, "tags": ["日本語", "知らないこと"]}
+{"id": "q08", "input": "Python のリストと辞書の違いを、初心者向けに 3 行で説明してください。", "expected": {"keywords": ["キー"]}, "tags": ["日本語", "説明"]}
