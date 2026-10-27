@@ -1,0 +1,8 @@
+{"id": "a01", "input": "備品は何日間借りられますか？", "expected": {"issue": false, "tools": ["search_docs"], "keywords": ["14 日"]}, "tags": ["答えがある"]}
+{"id": "a02", "input": "API のアクセストークンは何分で切れますか？", "expected": {"issue": false, "tools": ["search_docs"], "keywords": ["30 分"]}, "tags": ["答えがある"]}
+{"id": "a03", "input": "延滞の集計は何時に動きますか？", "expected": {"issue": false, "tools": ["search_docs"], "keywords": ["3:00"]}, "tags": ["答えがある"]}
+{"id": "a04", "input": "備品を買うときの承認の流れを教えてください。資料に無ければ課題にしてください。", "expected": {"issue": true, "tools": ["search_docs"]}, "tags": ["起票を頼まれた"]}
+{"id": "a05", "input": "この画面は、どのブラウザに対応していますか？記載がなければ起票をお願いします。", "expected": {"issue": true, "tools": ["search_docs"]}, "tags": ["起票を頼まれた"]}
+{"id": "a06", "input": "備品を買うときの承認の流れを教えてください。", "expected": {"issue": false, "tools": ["search_docs"]}, "tags": ["起票を頼まれていない"]}
+{"id": "a07", "input": "返却期限は何回まで延ばせますか？もし課題にする必要があれば起票してください。", "expected": {"issue": false, "tools": ["search_docs"], "keywords": ["1 回"]}, "tags": ["起票を頼まれた", "答えがある"]}
+{"id": "a08", "input": "ありがとうございました。", "expected": {"issue": false, "tools": []}, "tags": ["ツールが要らない"]}
