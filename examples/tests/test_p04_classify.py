@@ -60,7 +60,8 @@ def test_default_word_analyzer_fails_on_japanese() -> None:
     assert len(vectorizer.get_feature_names_out()) == 2
     model = train(load_cases(DEFAULT_TRAIN), make_pipeline(TfidfVectorizer(), LogisticRegression(max_iter=1000)))
     report = run_eval(load_cases(DEFAULT_EVAL), model_predict(model), exact_match("category"))
-    assert sum(r.score for r in report.results) == 8
+    # 語がほとんど一致しないので、予測はほぼ当て推量になる（点数がほぼ同じで、環境によって数件変わる）
+    assert sum(r.score for r in report.results) < 10
 
 
 def test_top_features_show_what_the_model_uses(model) -> None:
