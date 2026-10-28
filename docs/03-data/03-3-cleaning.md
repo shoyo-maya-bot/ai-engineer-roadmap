@@ -29,7 +29,7 @@
 
 ## なぜ必要か
 
-- 汚れたままでは、モデルは `billing` と `請求` を別の分類として学ぶ。窓口の 14 種類も、実際は 4 種類の言い換えにすぎない
+- 汚れたままでは、モデルは `billing` と `請求` を別の分類として学ぶ。窓口の（空欄を除く）13 種類も、実際は 4 種類の言い換えにすぎない
 - 99999 のような「欠損の代わりの値」は、数としては正しく見えるので、平均や学習を大きく狂わせる
 - 何を捨てたかを数えていないと、「学習データが 147 件から 130 件に減った理由」を、後から誰も説明できない
 
@@ -137,12 +137,12 @@ Q3 + 1.5 ×（Q3 − Q1）より大きい値を候補にする方法です。
 
 <!-- src: examples/src/roadmap_examples/p03_pipeline.py -->
 ```python title="examples/src/roadmap_examples/p03_pipeline.py"
-def parse_minutes(s: pd.Series) -> tuple[pd.Series, int]:
-    """「25」「25分」を数に. 戻り値は（分. 欠損は <NA>, 範囲外で欠損にした件数）."""
+def parse_minutes(s: pd.Series) -> tuple[pd.Series, pd.Series]:
+    """「25」「25分」を数に. 戻り値は（分. 欠損は <NA>, 範囲外で欠損にした行の印）."""
     text = s.map(lambda v: normalize_key(v).removesuffix("分"), na_action="ignore")
     minutes = pd.to_numeric(text, errors="coerce")
     out_of_range = minutes.notna() & ((minutes < 0) | (minutes >= MAX_MINUTES))
-    return minutes.mask(out_of_range).astype("Int64"), int(out_of_range.sum())
+    return minutes.mask(out_of_range).astype("Int64"), out_of_range
 ```
 
 - 99999（未完了）と -1 は、範囲外として欠損にします。行は捨てません（対応時間は分類の学習には使わないので。03-4）
@@ -182,7 +182,7 @@ uv run python -m roadmap_examples.p03_pipeline --out inquiries_clean.csv
 捨てた行（分類が空）: 6
 捨てた行（分類が 5 種類のどれでもない）: 2
 欠損にした値（受付日時が読めない）: 1
-欠損にした値（対応時間が範囲外）: 5
+欠損にした値（対応時間が範囲外）: 4
 欠損にした値（顧客の一覧に無い顧客）: 2
 出力した行: 130
 分類ごとの件数: billing 26, account 26, bug 26, contract 26, other 26
@@ -198,7 +198,7 @@ def test_run_on_sample_data_reports_every_drop() -> None:
     assert report.rows_read == 147
     assert (report.duplicates_exact, report.duplicates_updated) == (4, 2)
     assert report.dropped == {"本文が空": 3, "分類が空": 6, "分類が 5 種類のどれでもない": 2}
-    assert report.fixed == {"受付日時が読めない": 1, "対応時間が範囲外": 5, "顧客の一覧に無い顧客": 2}
+    assert report.fixed == {"受付日時が読めない": 1, "対応時間が範囲外": 4, "顧客の一覧に無い顧客": 2}
     assert report.rows_out == len(df) == 130
     assert report.by_category == dict.fromkeys(CATEGORIES, 26)
 ```
@@ -216,7 +216,7 @@ def test_run_on_sample_data_reports_every_drop() -> None:
 
 ## もし〇〇がなかったら？
 
-**表記ゆれをそろえなかったら**、分類が 19 種類の書き方のまま学習し、同じ意味のデータが別々の分類に散らばります。
+**表記ゆれをそろえなかったら**、分類が 19 種類の書き方（5 分類の言い換え 17 種類と、どれにも決まらない値 2 種類）のまま学習し、同じ意味のデータが別々の分類に散らばります。
 1 つの分類あたりの件数が減り、モデルはどの分類もうまく学べません。
 
 **捨てた理由を数えていなかったら**、来月のデータで「分類が空」の行が急に 3 割に増えても、気づかずに学習します。

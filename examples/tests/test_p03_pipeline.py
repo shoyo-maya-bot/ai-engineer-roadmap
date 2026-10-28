@@ -57,7 +57,7 @@ def test_parse_minutes() -> None:
     minutes, out_of_range = parse_minutes(pd.Series(["25", "25分", "", "-1", "99999", "abc"]).replace("", None))
     assert minutes.tolist()[:2] == [25, 25]
     assert minutes[2:].isna().all()
-    assert out_of_range == 2  # -1 と 99999. 「abc」は数でないだけ（範囲外には数えない）
+    assert out_of_range.tolist() == [False, False, False, True, True, False]  # -1 と 99999. 「abc」は数でないだけ
 
 
 def test_normalize_customer_id() -> None:
@@ -71,7 +71,7 @@ def test_run_on_sample_data_reports_every_drop() -> None:
     assert report.rows_read == 147
     assert (report.duplicates_exact, report.duplicates_updated) == (4, 2)
     assert report.dropped == {"本文が空": 3, "分類が空": 6, "分類が 5 種類のどれでもない": 2}
-    assert report.fixed == {"受付日時が読めない": 1, "対応時間が範囲外": 5, "顧客の一覧に無い顧客": 2}
+    assert report.fixed == {"受付日時が読めない": 1, "対応時間が範囲外": 4, "顧客の一覧に無い顧客": 2}
     assert report.rows_out == len(df) == 130
     assert report.by_category == dict.fromkeys(CATEGORIES, 26)
 
