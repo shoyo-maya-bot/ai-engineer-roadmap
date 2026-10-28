@@ -13,7 +13,12 @@ uv run api-to-csv --help
 
 | ファイル | 部 | 内容 |
 |---|---|---|
-| `src/roadmap_examples/p01_api_to_csv.py` | 01 | 公開 API から JSON を取り、CSV にする CLI の雛形 |
+| `src/roadmap_examples/p01_api_to_csv.py` | 01 | 公開 API から JSON を取り、CSV にする CLI（01 の成果物） |
+| `src/roadmap_examples/p01_*.py` | 01 | 他の言語との違いで覚える書き方（dataclass・Counter・with）・データ構造と計算量の比べ方 |
+| `src/roadmap_examples/p02_*.py` | 02 | ベクトルとコサイン類似度・数値の微分と勾配の確認・ばらつきと並べ替え検定・損失と勾配降下（線形回帰） |
+| `notebooks/p02_linreg.py` | 02 | 02 の成果物: 線形回帰を勾配降下で解き、最小二乗・scikit-learn と照合するノートブック（`# %%` のセルの形式） |
+| `src/roadmap_examples/p03_*.py` | 03 | 汚れた問い合わせデータを整えるパイプライン（03 の成果物）・SQL と pandas の集計・特徴量と前処理 |
+| `data/p03/` | 03 | 03 の題材（架空の汚れた問い合わせ 147 件と顧客 40 人）と、整えた表（130 件. 分類は 07 の評価セットと同じ 5 種類） |
 | `src/roadmap_examples/llm.py` | 06 以降 | LLM を呼ぶ部分のインターフェース（`LLMClient`）と、テスト用の偽の実装（`FakeLLM`）・呼び出し回数の上限（`LimitedLLM`） |
 | `src/roadmap_examples/p06_*.py` | 06 | 小さな BPE とコサイン類似度・temperature とコンテキストに収める処理・チャットのテンプレート・成果物（モデルの比べる表） |
 | `data/p06/questions.jsonl` | 06 | 06 の成果物で比べる質問（8 問。評価セットの形式） |

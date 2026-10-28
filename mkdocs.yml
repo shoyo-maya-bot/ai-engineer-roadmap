@@ -63,9 +63,39 @@ nav:
   - はじめに: index.md
   - 学び方: guide.md
   - 基礎:
-      - 01 Python と基礎: 01-python/index.md
-      - 02 AI のための数学: 02-math/index.md
-      - 03 データエンジニアリング: 03-data/index.md
+      - 01 Python と基礎:
+          - 01-python/index.md
+          - 01-1 他の言語との違いで覚える Python: 01-python/01-1-python-basics.md
+          - 01-2 Linux の基本操作と HTTP API の呼び方: 01-python/01-2-linux-http.md
+          - 01-3 データ構造と計算量: 01-python/01-3-data-structures.md
+          - 01-4 クラス設計・pytest・ruff: 01-python/01-4-class-pytest-ruff.md
+          - 解答:
+              - 01-1 解答: 01-python/answers/01-1.md
+              - 01-2 解答: 01-python/answers/01-2.md
+              - 01-3 解答: 01-python/answers/01-3.md
+              - 01-4 解答: 01-python/answers/01-4.md
+      - 02 AI のための数学:
+          - 02-math/index.md
+          - 02-1 ベクトル・行列とコサイン類似度: 02-math/02-1-vectors-cosine.md
+          - 02-2 微分と勾配: 02-math/02-2-derivative-gradient.md
+          - 02-3 確率・分布・検定の考え方: 02-math/02-3-probability-testing.md
+          - 02-4 損失関数と最適化: 02-math/02-4-loss-optimization.md
+          - 解答:
+              - 02-1 解答: 02-math/answers/02-1.md
+              - 02-2 解答: 02-math/answers/02-2.md
+              - 02-3 解答: 02-math/answers/02-3.md
+              - 02-4 解答: 02-math/answers/02-4.md
+      - 03 データエンジニアリング:
+          - 03-data/index.md
+          - 03-1 NumPy と pandas: 03-data/03-1-numpy-pandas.md
+          - 03-2 SQL での集計と結合: 03-data/03-2-sql.md
+          - 03-3 欠損・外れ値・表記ゆれの整理: 03-data/03-3-cleaning.md
+          - 03-4 特徴量と前処理パイプライン: 03-data/03-4-features-pipeline.md
+          - 解答:
+              - 03-1 解答: 03-data/answers/03-1.md
+              - 03-2 解答: 03-data/answers/03-2.md
+              - 03-3 解答: 03-data/answers/03-3.md
+              - 03-4 解答: 03-data/answers/03-4.md
   - 機械学習・深層学習:
       - 04 機械学習: 04-ml/index.md
       - 05 ディープラーニング: 05-deep-learning/index.md
