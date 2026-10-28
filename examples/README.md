@@ -15,6 +15,8 @@ uv run api-to-csv --help
 |---|---|---|
 | `src/roadmap_examples/p01_api_to_csv.py` | 01 | 公開 API から JSON を取り、CSV にする CLI の雛形 |
 | `src/roadmap_examples/llm.py` | 06 以降 | LLM を呼ぶ部分のインターフェース（`LLMClient`）と、テスト用の偽の実装（`FakeLLM`）・呼び出し回数の上限（`LimitedLLM`） |
+| `src/roadmap_examples/p06_*.py` | 06 | 小さな BPE とコサイン類似度・temperature とコンテキストに収める処理・チャットのテンプレート・成果物（モデルの比べる表） |
+| `data/p06/questions.jsonl` | 06 | 06 の成果物で比べる質問（8 問。評価セットの形式） |
 | `src/roadmap_examples/ollama_client.py` | 07 以降 | ローカルの LLM（Ollama）を呼ぶ本物の実装（会話・構造化出力・ツール使用・エンベディング） |
 | `src/roadmap_examples/evalset.py` | 07 以降 | 評価セット（JSONL）の読み書き・採点・前回の結果との比較 |
 | `src/roadmap_examples/p07_*.py` | 07 | プロンプトの組み立て・構造化出力の検証・ツール使用・費用の上限とキャッシュ・成果物（分類の比較） |

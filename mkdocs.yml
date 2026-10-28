@@ -70,7 +70,17 @@ nav:
       - 04 機械学習: 04-ml/index.md
       - 05 ディープラーニング: 05-deep-learning/index.md
   - LLM 応用:
-      - 06 LLM の基礎: 06-llm-basics/index.md
+      - 06 LLM の基礎:
+          - 06-llm-basics/index.md
+          - 06-1 トークンとエンベディング: 06-llm-basics/06-1-tokens-embeddings.md
+          - 06-2 LLM の仕組みとコンテキストウィンドウ: 06-llm-basics/06-2-context-window.md
+          - 06-3 事前学習・指示調整・ファインチューニングの違い: 06-llm-basics/06-3-training-stages.md
+          - 06-4 モデルの選び方: 06-llm-basics/06-4-choosing-models.md
+          - 解答:
+              - 06-1 解答: 06-llm-basics/answers/06-1.md
+              - 06-2 解答: 06-llm-basics/answers/06-2.md
+              - 06-3 解答: 06-llm-basics/answers/06-3.md
+              - 06-4 解答: 06-llm-basics/answers/06-4.md
       - 07 プロンプトと API:
           - 07-prompt-api/index.md
           - 07-1 プロンプトの設計: 07-prompt-api/07-1-prompt-design.md
