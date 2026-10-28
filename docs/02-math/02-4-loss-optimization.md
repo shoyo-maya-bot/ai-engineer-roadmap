@@ -61,7 +61,7 @@ def log_loss(y: ArrayLike, p: ArrayLike, eps: float = 1e-15) -> float:
     return float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))
 ```
 
-3 つとも、scikit-learn の同じ名前の関数と同じ値になることを、テストで確かめています（`examples/tests/test_p02_linreg.py`）。
+3 つとも、scikit-learn の対応する関数（`mean_squared_error`・`mean_absolute_error`・`log_loss`）と同じ値になることを、テストで確かめています（`examples/tests/test_p02_linreg.py`）。
 
 外れ値が 1 件あると、MSE と MAE は大きく違います。
 

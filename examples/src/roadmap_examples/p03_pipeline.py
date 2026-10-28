@@ -144,12 +144,12 @@ def parse_received_at(s: pd.Series) -> pd.Series:
     return pd.to_datetime(parts.astype(float), errors="coerce")
 
 
-def parse_minutes(s: pd.Series) -> tuple[pd.Series, int]:
-    """「25」「25分」を数に. 戻り値は（分. 欠損は <NA>, 範囲外で欠損にした件数）."""
+def parse_minutes(s: pd.Series) -> tuple[pd.Series, pd.Series]:
+    """「25」「25分」を数に. 戻り値は（分. 欠損は <NA>, 範囲外で欠損にした行の印）."""
     text = s.map(lambda v: normalize_key(v).removesuffix("分"), na_action="ignore")
     minutes = pd.to_numeric(text, errors="coerce")
     out_of_range = minutes.notna() & ((minutes < 0) | (minutes >= MAX_MINUTES))
-    return minutes.mask(out_of_range).astype("Int64"), int(out_of_range.sum())
+    return minutes.mask(out_of_range).astype("Int64"), out_of_range
 
 
 def normalize_customer_id(s: pd.Series) -> pd.Series:
@@ -202,7 +202,7 @@ def clean_inquiries(raw: pd.DataFrame, customers: pd.DataFrame, report: CleanRep
     keep = ~(rules["本文が空"] | rules["分類が空"] | rules["分類が 5 種類のどれでもない"])
     report.fixed = {
         "受付日時が読めない": int((df["received_at"].isna() & keep).sum()),
-        "対応時間が範囲外": out_of_range,
+        "対応時間が範囲外": int((out_of_range & keep).sum()),  # 捨てる行の値は数えない（ほかの理由と同じ）
         "顧客の一覧に無い顧客": int((unknown_customer & keep).sum()),
     }
 
