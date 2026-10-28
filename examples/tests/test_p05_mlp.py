@@ -22,8 +22,20 @@ def test_learns_xor() -> None:
     assert predict(params, XOR_X).tolist() == XOR_Y.tolist()
 
 
-def test_zero_init_cannot_break_symmetry() -> None:
-    """重みを全部同じ値（0）で始めると、隠れ層の素子が同じ勾配を受け、違いが生まれない."""
+def test_zero_init_freezes_the_weights() -> None:
+    """全部 0 で始めると、tanh(0) = 0 で隠れ層の出力が 0 になり、動くのは出力のバイアス b2 だけ."""
     params = {k: np.zeros_like(v) for k, v in init_params(2, 4, 2).items()}
     _, grads = loss_and_grads(params, XOR_X, XOR_Y)
-    assert np.allclose(grads["w1"], 0.0)
+    for name in ("w1", "b1", "w2"):
+        assert np.allclose(grads[name], 0.0), name
+
+
+def test_same_nonzero_init_keeps_hidden_units_identical() -> None:
+    """0 以外の同じ値で始めると勾配は 0 にならないが、隠れ層の素子はいつまでも同じ動きをする（素子 1 個と同じ）."""
+    params = {k: np.full_like(v, 0.5) for k, v in init_params(2, 4, 2).items()}
+    for _ in range(200):
+        _, grads = loss_and_grads(params, XOR_X, XOR_Y)
+        for name in params:
+            params[name] -= 0.5 * grads[name]
+    assert not np.allclose(params["w1"], 0.5)  # 重みは動いた
+    assert np.allclose(params["w1"], params["w1"][:, :1])  # 4 個の素子の重みは、どれも同じまま

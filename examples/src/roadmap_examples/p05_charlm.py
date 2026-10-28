@@ -20,6 +20,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import sys
 from collections.abc import Sequence
@@ -32,9 +34,9 @@ import numpy as np
 from roadmap_examples.p05_loop import Adam
 from roadmap_examples.p05_mlp import Params, softmax
 
-P04_TRAIN = Path(__file__).resolve().parents[2] / "data" / "p04" / "train.jsonl"
+P03_CLEAN = Path(__file__).resolve().parents[2] / "data" / "p03" / "inquiries_clean.csv"
 
-# 架空の問い合わせの文を、部品の組み合わせで作る（04 の 100 件だけでは、すぐに丸暗記してしまうため）
+# 架空の問い合わせの文を、部品の組み合わせで作る（03 の 130 件だけでは、すぐに丸暗記してしまうため）
 TARGETS = ("請求書", "領収書", "パスワード", "メールアドレス", "プラン", "契約", "画面", "通知", "アプリ", "検索")
 TARGETS += ("支払い方法", "二段階認証", "利用人数", "更新日", "ファイル", "会員ページ", "解約", "見積書")
 PATTERNS = (
@@ -62,9 +64,13 @@ def template_corpus(n_lines: int = 1500, seed: int = 0) -> str:
     return "\n".join(lines) + "\n"
 
 
-def jsonl_corpus(path: Path = P04_TRAIN) -> str:
-    """評価セットの形式の JSONL（04 の学習データなど）の input の文を、改行でつなぐ."""
-    lines = [json.loads(line)["input"] for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+def file_corpus(path: Path = P03_CLEAN) -> str:
+    """CSV（03 の成果物など）か JSONL（評価セットの形式）の input の文を、改行でつなぐ."""
+    text = path.read_text(encoding="utf-8")
+    if path.suffix == ".csv":
+        lines = [row["input"] for row in csv.DictReader(io.StringIO(text))]
+    else:
+        lines = [json.loads(line)["input"] for line in text.splitlines() if line.strip()]
     return "\n".join(lines) + "\n"
 
 
@@ -205,15 +211,18 @@ class TrainResult:
 
 
 def split_lines(text: str) -> tuple[str, str]:
-    """10 行に 1 行を検証に回す（末尾だけを検証にすると、行の並びの偏りが入る）."""
-    lines = text.strip("\n").split("\n")
+    """同じ行を 1 つにまとめてから、10 行に 1 行を検証に回す.
+
+    同じ行が学習と検証の両方に入ると、検証が「覚えた行」の試験になる. 末尾だけを検証にすると、行の並びの偏りが入る.
+    """
+    lines = list(dict.fromkeys(text.strip("\n").split("\n")))  # 出てきた順を保ったまま、重複を除く
     train = [line for i, line in enumerate(lines) if i % 10 != 9]
     val = [line for i, line in enumerate(lines) if i % 10 == 9]
     return "\n".join(train) + "\n", "\n".join(val) + "\n"
 
 
 def train(text: str, steps: int = 2000, cfg: Config | None = None, eval_every: int = 500) -> TrainResult:
-    """9 割の行で学習し、残りの行で検証の損失を測る. 最適化は 05-2 の Adam."""
+    """同じ行を除いて 9 割の行で学習し、残りの行で検証の損失を測る. 最適化は 05-2 の Adam."""
     cfg = cfg or Config()
     vocab = Vocab.build(text)
     train_text, val_text = split_lines(text)
@@ -266,7 +275,7 @@ def load(path: Path) -> tuple[Params, Vocab, Config]:
 
 def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="p05_charlm", description="小さな文字単位の言語モデルを学習し、文を作る")
-    p.add_argument("--corpus", type=Path, help="学習に使う JSONL（input の文）. 省略すると部品を組み合わせた文")
+    p.add_argument("--corpus", type=Path, help="学習に使う CSV か JSONL（input の文）. 省略すると部品を組み合わせた文")
     p.add_argument("--steps", type=int, default=2000, help="学習のステップ数")
     p.add_argument("--save", type=Path, help="学習したモデルを保存する .npz")
     p.add_argument("--load", type=Path, help="学習せずに、保存したモデルを読む")
@@ -284,12 +293,14 @@ def main(argv: Sequence[str] | None = None, stdout: TextIO | None = None) -> int
         if args.load:
             params, vocab, cfg = load(args.load)
         else:
-            text = jsonl_corpus(args.corpus) if args.corpus else template_corpus()
+            text = file_corpus(args.corpus) if args.corpus else template_corpus()
             result = train(text, args.steps, Config(seed=args.seed))
             params, vocab, cfg = result.params, result.vocab, result.cfg
+            train_text, val_text = split_lines(text)
             print(
-                f"語彙: {len(vocab.chars)} 文字 / 文章: {len(text)} 文字（9 割の行で学習、1 割の行で検証）", file=stdout
+                f"語彙: {len(vocab.chars)} 文字 / 学習: {len(train_text)} 文字・検証: {len(val_text)} 文字", file=stdout
             )
+            print("（同じ行を 1 つにまとめてから、10 行に 1 行を検証に回す）", file=stdout)
             print(f"何も学んでいないときの損失（log 語彙数）: {np.log(len(vocab.chars)):.2f}", file=stdout)
             for step, train_loss, val_loss in result.log:
                 print(f"ステップ {step}: 学習の損失 {train_loss:.2f} / 検証の損失 {val_loss:.2f}", file=stdout)
