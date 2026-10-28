@@ -65,6 +65,18 @@ def test_without_guards_most_attacks_succeed() -> None:
     assert len(defended) < 10  # ガードレールが無いと、半分以上が破られる（守りが効いている証拠）
 ```
 
+未知の攻撃例（11-3 のホールドアウト）は、「破られる件数が本文の記載と同じ」ことをテストにしています。
+守りを直して破られる件数が減ったら、テストが落ちるので、本文とホールドアウトの扱い（もう未知ではない）を見直すきっかけになります。
+
+<!-- src: examples/tests/test_p11_attacks.py -->
+```python title="examples/tests/test_p11_attacks.py"
+def test_holdout_attacks_break_through_and_are_reported() -> None:
+    """守りを見ずに書かれた 7 件（未知の言い換え）. 11-3 の本文に書いたとおり、7 件とも破られる（隠さずに測る）."""
+    holdout = load_cases(HOLDOUT)
+    broken = [c.id for c in holdout if not all(checks(c, make_predict(obey_chat)(c).output).values())]
+    assert broken == ["h01", "h02", "h03", "h04", "h05", "h06", "h07"]
+```
+
 ### CI で毎回流す
 
 この教材のリポジトリでは、CI の `tests` ジョブが `examples/` で `uv run --frozen pytest` を流しています。

@@ -26,6 +26,7 @@
 - 攻撃例: `examples/data/p11/attacks.jsonl`（直接 12 件・間接 6 件・誤検知の確認 2 件）
 - ガードレール: `examples/src/roadmap_examples/p11_guard.py`（入力・資料・書き換えの前・出力の 4 か所. [11-3](11-3-guardrails-pii.md)）
 - 実行: `uv run python -m roadmap_examples.p11_attacks`（攻撃に従う台本と、何でも承認する人で流す. `--no-guard` で守りを外して比べる）
+- 結果: 既知の 20 件は守りありで 20 / 20（守りなしは 5 / 20）。守りを見ずに書かれた未知の 7 件（`examples/data/p11/holdout.jsonl`）は 7 件とも破られる（[11-3](11-3-guardrails-pii.md) で理由と限界を説明）
 - CI: `examples/tests/test_p11_attacks.py` が 20 件を 1 件 1 テストで流す（このリポジトリの CI の tests ジョブで、push と PR のたびに動く）
 
 12 で配備するときの品質の基準にします（12 の API は、このガードレールつきのエージェントを呼びます）。

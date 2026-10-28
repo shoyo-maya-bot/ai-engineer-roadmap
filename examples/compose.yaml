@@ -4,7 +4,7 @@
 name: roadmap-agent
 services:
   ollama:
-    image: ollama/ollama:${OLLAMA_TAG:-latest} # 本番では版を固定する（OLLAMA_TAG）
+    image: ollama/ollama:${OLLAMA_TAG:-0.40.11} # 版を固定する（上げるときは OLLAMA_TAG か、この既定を書き換える）
     volumes:
       - ollama:/root/.ollama # 入れたモデルを、作り直しても残す
   agent:

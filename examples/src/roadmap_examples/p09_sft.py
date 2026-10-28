@@ -50,6 +50,30 @@ def overlaps(train: Sequence[EvalCase], evaluation: Sequence[EvalCase]) -> list[
     return [(c.id, seen[normalized(c.input)]) for c in train if normalized(c.input) in seen]
 
 
+def bigrams(text: str) -> set[str]:
+    """似ているかを比べるための、2 文字の組の集まり（全角・半角・空白・記号の違いは無視する）."""
+    t = "".join(ch for ch in unicodedata.normalize("NFKC", text).lower() if ch.isalnum())
+    return {t[i : i + 2] for i in range(len(t) - 1)}
+
+
+def similarity(a: str, b: str) -> float:
+    """2 文字の組の重なり（ジャッカード係数. 0〜1. 1 なら同じ組の集まり）."""
+    x, y = bigrams(a), bigrams(b)
+    return len(x & y) / len(x | y) if x | y else 0.0
+
+
+def nearest_pairs(
+    train: Sequence[EvalCase], evaluation: Sequence[EvalCase], top: int = 5
+) -> list[tuple[float, str, str]]:
+    """学習の例と評価セットで、似ている組（似ている度合い, 学習の id, 評価の id）を、似ている順に top 件.
+
+    完全に同じ文章でなくても、言い換えただけの例が混ざると、評価セットの点は実力より高く出る.
+    上位の組は人が読んで、言い換えなら学習の例から外す.
+    """
+    pairs = [(similarity(t.input, e.input), t.id, e.id) for t in train for e in evaluation]
+    return sorted(pairs, key=lambda p: (-p[0], p[1], p[2]))[:top]
+
+
 def write_jsonl(records: Sequence[dict[str, Any]], path: Path) -> None:
     path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records), encoding="utf-8")
 
@@ -79,6 +103,8 @@ def main(argv: Sequence[str] | None = None, stdout: TextIO | None = None) -> int
         for train_id, eval_id in same:
             print(f"  {train_id} = {eval_id}", file=sys.stderr)
         return 1
+    for score, train_id, eval_id in nearest_pairs(train, evaluation, top=3):
+        print(f"似ている組（読んで確かめる）: {train_id} と {eval_id}（{score:.2f}）", file=stdout)
     write_jsonl(records, args.out)
     print(f"{len(records)} 件を書き出しました: {args.out}", file=stdout)
     return 0

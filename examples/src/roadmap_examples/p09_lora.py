@@ -5,11 +5,13 @@
 - 使う重みは W + (alpha / r) × B @ A. B を 0 で始めるので、学習の前は元のモデルとまったく同じ答えになる
 - 学習の後は B @ A を W に足し込める（マージ）. マージしたモデルは、元と同じ大きさ・同じ速さで動く
 
-題材: 07 の問い合わせの分類（5 つ）. 「事前学習」の代わりに汎用の短い例（data/p09/base_train.jsonl）で
+題材: 07 の問い合わせの分類（5 つ）. 「事前学習」の代わりに汎用の例（data/p09/base_train.jsonl）で
 小さなモデルを作り、業務の例（data/p09/sft_train.jsonl）で LoRA の調整をして、07 の評価セットで前後を比べる.
+学習の例は、07 の評価セットを見ていない人が、分類の定義だけから書いた（評価セットに寄せていない）.
+r などの設定は検証用の例（data/p09/sft_val.jsonl）で選び、07 の評価セットは最後に 1 回だけ使う.
 
 使い方（examples/ で. LLM もネットワークも使わない）:
-  uv run python -m roadmap_examples.p09_lora --out results-lora.jsonl
+  uv run python -m roadmap_examples.p09_lora --ranks 1,2,4,8 --out results-lora.jsonl
 """
 
 from __future__ import annotations
@@ -42,6 +44,7 @@ from roadmap_examples.p07_prompt import CATEGORIES
 DATA = Path(__file__).resolve().parents[2] / "data" / "p09"
 BASE_TRAIN = DATA / "base_train.jsonl"
 SFT_TRAIN = DATA / "sft_train.jsonl"
+SFT_VAL = DATA / "sft_val.jsonl"  # 設定（r など）を選ぶための検証用. 07 の評価セットとは別
 LABELS = tuple(CATEGORIES)
 DIM = 512  # 入力のベクトルの長さ（文字と 2 文字の組を、この数の箱に振り分ける）
 HIDDEN = 32  # 中間の層の大きさ
@@ -227,8 +230,9 @@ def run_all(
     alpha: float = 8.0,
     epochs: int = 300,
     seed: int = 0,
+    val_cases: Sequence[EvalCase] = (),
 ) -> Run:
-    """事前学習の代わり → LoRA の調整 → 比べるためのフルの調整、を順に行い、同じ評価セットで測る."""
+    """事前学習の代わり → LoRA の調整 → 比べるためのフルの調整、を順に行い、検証用と評価セットで測る."""
     seconds = {}
     started = time.perf_counter()
     base = train_full(init_model(seed), *encode(base_cases), epochs=epochs)
@@ -244,23 +248,54 @@ def run_all(
         "lora": evaluate(base, eval_cases, lora, name=f"lora-r{r}"),
         "full": evaluate(full, eval_cases, name="full"),
     }
+    if val_cases:
+        reports |= {
+            "base_val": evaluate(base, val_cases, name="base"),
+            "lora_val": evaluate(base, val_cases, lora, name=f"lora-r{r}"),
+            "full_val": evaluate(full, val_cases, name="full"),
+        }
     return Run(base, lora, full, reports, seconds)
+
+
+def choose_rank(
+    base_cases: Sequence[EvalCase],
+    sft_cases: Sequence[EvalCase],
+    val_cases: Sequence[EvalCase],
+    ranks: Sequence[int],
+    alpha: float = 8.0,
+    epochs: int = 300,
+    seed: int = 0,
+) -> tuple[int, dict[int, float]]:
+    """検証用の例の正解率で r を選ぶ（同じ点なら小さい r）. 07 の評価セットは使わない."""
+    base = train_full(init_model(seed), *encode(base_cases), epochs=epochs)
+    x, y = encode(sft_cases)
+    scores = {
+        r: evaluate(base, val_cases, train_lora(base, init_lora(base, r, alpha, seed), x, y, epochs)).mean
+        for r in ranks
+    }
+    best = max(sorted(scores), key=lambda r: (scores[r], -r))
+    return best, scores
+
+
+def score_text(report: Report) -> str:
+    correct = sum(r.score for r in report.results)
+    return f"{report.mean:.1%}（{correct:.0f} / {len(report.results)}）"
 
 
 def summary(run: Run) -> str:
     trained = {"base": run.base.n_params, "lora": run.lora.n_params, "full": run.full.n_params}
     names = {"base": "調整の前（汎用の例だけで学習）", "lora": f"LoRA（r={run.lora.r}）", "full": "フルの調整"}
-    lines = ["| モデル | 正解率 | 学習した重みの数 | 学習の秒数 |", "|---|---|---|---|"]
+    has_val = "lora_val" in run.reports
+    lines = ["| モデル | 検証用 | 評価セット（07） | 学習した重みの数 | 学習の秒数 |", "|---|---|---|---|---|"]
     for key in ("base", "lora", "full"):
-        report = run.reports[key]
-        correct = sum(r.score for r in report.results)
+        val = score_text(run.reports[f"{key}_val"]) if has_val else "—"
         lines.append(
-            f"| {names[key]} | {report.mean:.1%}（{correct:.0f} / {len(report.results)}）"
-            f" | {trained[key]:,} | {run.seconds[key]:.2f} |"
+            f"| {names[key]} | {val} | {score_text(run.reports[key])} | {trained[key]:,} | {run.seconds[key]:.2f} |"
         )
     lines.append("")
     lines.append(
-        "タグごとの正解率（LoRA）: " + ", ".join(f"{t} {s:.0%}" for t, s in run.reports["lora"].by_tag().items())
+        "タグごとの正解率（LoRA・評価セット）: "
+        + ", ".join(f"{t} {s:.0%}" for t, s in run.reports["lora"].by_tag().items())
     )
     return "\n".join(lines)
 
@@ -269,30 +304,37 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         prog="p09_lora", description="小さなモデルを LoRA で調整し、07 の評価セットで前後を比べる"
     )
-    p.add_argument("--rank", type=int, default=4, help="LoRA のランク r")
+    p.add_argument("--rank", type=int, default=4, help="LoRA のランク r（--ranks を渡さないとき）")
+    p.add_argument("--ranks", help="r の候補（例: 1,2,4,8）. 検証用の例の正解率で選び、選んだ r だけを評価セットで測る")
     p.add_argument("--alpha", type=float, default=8.0, help="LoRA の alpha（差分は alpha / r 倍する）")
     p.add_argument("--epochs", type=int, default=300, help="学習の回数")
     p.add_argument("--seed", type=int, default=0, help="乱数の種（同じ種なら毎回同じ結果）")
-    p.add_argument("--eval", type=Path, default=DEFAULT_EVAL, help="評価セット（07 の形式）")
+    p.add_argument("--val", type=Path, default=SFT_VAL, help="設定を選ぶための検証用の例（07 の形式）")
+    p.add_argument("--eval", type=Path, default=DEFAULT_EVAL, help="評価セット（07 の形式. 最後に 1 回だけ使う）")
     p.add_argument("--out", type=Path, help="LoRA の結果を書く JSONL（07 の --compare で比べられる）")
     args = p.parse_args(argv)
-    if args.rank < 1 or args.epochs < 1:
-        p.error("--rank と --epochs は 1 以上にしてください")
+    try:
+        args.ranks = [int(r) for r in args.ranks.split(",")] if args.ranks else []
+    except ValueError:
+        p.error("--ranks は 1,2,4 のように、数をカンマで区切って書いてください")
+    if args.rank < 1 or args.epochs < 1 or any(r < 1 for r in args.ranks):
+        p.error("r と --epochs は 1 以上にしてください")
     return args
 
 
 def main(argv: Sequence[str] | None = None, stdout: TextIO | None = None) -> int:
     args = parse_args(argv)
     stdout = stdout or sys.stdout
-    run = run_all(
-        load_cases(BASE_TRAIN),
-        load_cases(SFT_TRAIN),
-        load_cases(args.eval),
-        args.rank,
-        args.alpha,
-        args.epochs,
-        args.seed,
-    )
+    base_cases, sft_cases, val_cases = load_cases(BASE_TRAIN), load_cases(SFT_TRAIN), load_cases(args.val)
+    rank = args.rank
+    if args.ranks:
+        rank, scores = choose_rank(base_cases, sft_cases, val_cases, args.ranks, args.alpha, args.epochs, args.seed)
+        print(
+            "検証用の例での正解率（r を選ぶ）: " + ", ".join(f"r={r} {s:.0%}" for r, s in scores.items()), file=stdout
+        )
+        print(f"選んだ r: {rank}（評価セットは、選んだ r だけで 1 回測る）", file=stdout)
+        print("", file=stdout)
+    run = run_all(base_cases, sft_cases, load_cases(args.eval), rank, args.alpha, args.epochs, args.seed, val_cases)
     print(summary(run), file=stdout)
     if args.out:
         save_results(run.reports["lora"], args.out)

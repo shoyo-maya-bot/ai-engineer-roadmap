@@ -9,7 +9,8 @@
              .github/workflows の python-version
    - pytest: examples/pyproject.toml の dev（pytest==）・examples/uv.lock・requirements.txt・constraints.txt
    - ruff:   examples/pyproject.toml の dev（ruff==）・examples/uv.lock・.github/workflows の ruff==
-   - uv:     .github/workflows の uv==・examples/pyproject.toml の uv_build>=
+   - uv:     .github/workflows の uv==・examples/pyproject.toml の uv_build>=・
+             examples/Dockerfile の ghcr.io/astral-sh/uv:（あれば）
 2. 本文（コードブロックと HTML コメントの外）に、版を直接書いていない（「Python 3.12」「uv 0.8」「pytest 9.1」など）
 3. {{ versions.* }} を使うページに render_macros: true があり、参照する名前が extra.versions にある
 
@@ -97,6 +98,11 @@ def actual_versions(root: Path) -> tuple[dict[str, list[tuple[str, str | None]]]
         if path.is_file():
             pins = file_pins(read(path), "pytest")
             found["pytest"].append((name, pins[0] if pins else None))
+
+    dockerfile = examples / "Dockerfile"
+    if dockerfile.is_file():
+        for v in re.findall(r"ghcr\.io/astral-sh/uv:([\w.]+)", read(dockerfile)):
+            found["uv"].append(("examples/Dockerfile の ghcr.io/astral-sh/uv", v))
 
     for wf in walk(root / ".github" / "workflows", (".yml", ".yaml")):
         text = read(wf)

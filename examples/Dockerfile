@@ -1,9 +1,10 @@
 # 12-2 エージェントの API（roadmap_examples.p12_api）を動かすイメージ.
 # examples/ で: docker build -t roadmap-agent .
-FROM python:3.12-slim
+# 版はタグ（パッチの版と OS まで）と digest（中身の目印）で固定する. 更新するときは両方を書き換える
+FROM python:3.12.16-slim-trixie@sha256:dacd1678a25ee255c22ea5de948374f5542db3562dd365038b14349051ea156c
 
-# uv は版を固定して、公式のイメージから写す（https://docs.astral.sh/uv/guides/integration/docker/ ）
-COPY --from=ghcr.io/astral-sh/uv:0.8.17 /uv /uvx /bin/
+# uv は公式のイメージから写す（https://docs.astral.sh/uv/guides/integration/docker/ ）. 版は extra.versions.uv と同じ（check_versions.py が照合）
+COPY --from=ghcr.io/astral-sh/uv:0.8.17@sha256:e4644cb5bd56fdc2c5ea3ee0525d9d21eed1603bccd6a21f887a938be7e85be1 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1
 WORKDIR /app
 

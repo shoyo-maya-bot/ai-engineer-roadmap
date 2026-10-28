@@ -181,6 +181,8 @@ class AgentApp:
             length = int(environ.get("CONTENT_LENGTH") or 0)
         except ValueError:
             return 400, {}
+        if length < 0:  # 負の値を通すと、read(-1) で本文を全部読んでしまう（上限をすり抜ける）
+            return 400, {}
         if length > MAX_BODY:
             return 413, {}
         try:
@@ -201,8 +203,10 @@ class AgentApp:
     def approve(self, environ: dict[str, Any], request_id: str) -> tuple[int, dict[str, Any]]:
         if not self.approver_token:
             return 403, {"error": "承認の API は無効です（APPROVER_TOKEN が設定されていません）"}
-        given = environ.get("HTTP_AUTHORIZATION", "").removeprefix("Bearer ")
-        if not hmac.compare_digest(given.encode("utf-8"), self.approver_token.encode("utf-8")):
+        scheme, _, given = environ.get("HTTP_AUTHORIZATION", "").partition(" ")
+        if scheme.lower() != "bearer" or not hmac.compare_digest(
+            given.encode("utf-8"), self.approver_token.encode("utf-8")
+        ):
             return 401, {"error": "承認の係の鍵が違います"}
         code, data = self.read_json(environ)
         if code or not isinstance(data.get("approved"), bool):

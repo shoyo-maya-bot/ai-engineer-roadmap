@@ -127,7 +127,7 @@ render_macros: true
 
 - `{{ versions.* }}` を使うページは、先頭に `render_macros: true` を書く（無いと `{{ }}` がそのまま表示される）
 - `scripts/check_versions.py`（CI）が、`extra.versions` と実物（`examples/pyproject.toml`・`examples/.python-version`・`examples/uv.lock`・
-  `requirements.txt`・`constraints.txt`・`.github/workflows`）を照合し、本文に直接書いた版（「Python 3.12」「pytest 9.1」など）を検出する
+  `requirements.txt`・`constraints.txt`・`.github/workflows`・`examples/Dockerfile` の uv のイメージ）を照合し、本文に直接書いた版（「Python 3.12」「pytest 9.1」など）を検出する
 - 版を上げるときは、実物と `extra.versions` を同じ PR で直す
 - README・CONTRIBUTING などの説明に書いた版は `scripts/check_docs_match.py` が `extra.versions` と照合する
 

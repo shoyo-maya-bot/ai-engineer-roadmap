@@ -92,6 +92,12 @@ def test_ask_rejects_bad_bodies(tmp_path: Path) -> None:
     assert call(app, "POST", "/ask", b"{not json")[0] == 400
     assert call(app, "POST", "/ask", {"question": ""})[0] == 400
     assert call(app, "POST", "/ask", {"question": "あ" * 20_000})[0] == 413
+    environ = {"REQUEST_METHOD": "POST", "PATH_INFO": "/ask", "CONTENT_LENGTH": "-1"}
+    environ["wsgi.input"] = io.BytesIO(json.dumps({"question": "あ" * 20_000}).encode("utf-8"))
+    setup_testing_defaults(environ)
+    status: list[str] = []
+    app(environ, lambda s, _h: status.append(s))
+    assert status[0].startswith("400")  # 負の長さで上限をすり抜けない
     assert call(app, "GET", "/nothing")[0] == 404
 
 
@@ -112,6 +118,12 @@ def test_issue_waits_for_approval_then_continues(tmp_path: Path) -> None:
 
     assert call(app, "POST", f"/approvals/{request_id}", {"approved": True})[0] == 401  # 鍵が無い
     assert call(app, "POST", f"/approvals/{request_id}", {"approved": True}, token="wrong")[0] == 401
+    basic = {"REQUEST_METHOD": "POST", "PATH_INFO": f"/approvals/{request_id}", "HTTP_AUTHORIZATION": f"Basic {TOKEN}"}
+    basic |= {"CONTENT_LENGTH": "18", "wsgi.input": io.BytesIO(b'{"approved": true}')}
+    setup_testing_defaults(basic)
+    status: list[str] = []
+    app(basic, lambda s, _h: status.append(s))
+    assert status[0].startswith("401")  # Bearer 以外の書き方は受け付けない
     status, body = call(app, "POST", f"/approvals/{request_id}", {"approved": True}, token=TOKEN)
     assert status == 200 and body["answer"] == "起票しました"
     assert [i.title for i in tracker.issues] == ["延長の回数が資料に無い"]

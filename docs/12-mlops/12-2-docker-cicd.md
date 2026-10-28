@@ -42,10 +42,11 @@ CI でテストとイメージの組み立てを流せば、「テストが通�
 
 <!-- src: examples/Dockerfile -->
 ```dockerfile title="examples/Dockerfile"
-FROM python:3.12-slim
+# 版はタグ（パッチの版と OS まで）と digest（中身の目印）で固定する. 更新するときは両方を書き換える
+FROM python:3.12.16-slim-trixie@sha256:dacd1678a25ee255c22ea5de948374f5542db3562dd365038b14349051ea156c
 
-# uv は版を固定して、公式のイメージから写す（https://docs.astral.sh/uv/guides/integration/docker/ ）
-COPY --from=ghcr.io/astral-sh/uv:0.8.17 /uv /uvx /bin/
+# uv は公式のイメージから写す（https://docs.astral.sh/uv/guides/integration/docker/ ）. 版は extra.versions.uv と同じ（check_versions.py が照合）
+COPY --from=ghcr.io/astral-sh/uv:0.8.17@sha256:e4644cb5bd56fdc2c5ea3ee0525d9d21eed1603bccd6a21f887a938be7e85be1 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1
 WORKDIR /app
 
@@ -60,7 +61,9 @@ COPY data ./data
 RUN uv sync --locked --no-dev
 ```
 
-- **版を固定する**: Python のイメージ・uv のイメージ・依存（`uv.lock`）の版を固定します。uv の版は、演習で使う uv と同じにしています（学び方のページの版）。演習の uv の版を上げるときは、この行も直します
+- **版を固定する**: Python のイメージ・uv のイメージ・依存（`uv.lock`）の版を固定します。イメージは、タグ（パッチの版と OS まで: `3.12.16-slim-trixie`）と、
+  中身の目印の digest（`@sha256:…`）の両方で書きます。タグだけだと、同じタグのまま中身が差し替わることがあるからです。digest は、公式のレジストリでタグを調べて書き写しました
+- **uv の版**: 演習で使う uv と同じにしています（学び方のページの版）。`scripts/check_versions.py` が、この行の版と `mkdocs.yml` の `extra.versions.uv` を照合し、ずれたら CI で止めます
 - **層を分ける**: Docker は、Dockerfile の行ごとに結果（層）を取っておき、変わっていない行は作り直しません。
   依存を先に入れておくと、コードだけを直したときは、依存の層が使い回されて速く組み立てられます
 - **`--locked`**: `uv.lock` が `pyproject.toml` と合っていなければ失敗します。手元と違う版が入るのを防ぎます。`--no-dev` で、テスト用の依存（pytest など）は入れません
@@ -104,7 +107,7 @@ docker run --rm -p 127.0.0.1:8000:8000 -e AGENT_MODEL=<モデル名> -e OLLAMA_B
 ```yaml title="examples/compose.yaml"
 services:
   ollama:
-    image: ollama/ollama:${OLLAMA_TAG:-latest} # 本番では版を固定する（OLLAMA_TAG）
+    image: ollama/ollama:${OLLAMA_TAG:-0.40.11} # 版を固定する（上げるときは OLLAMA_TAG か、この既定を書き換える）
     volumes:
       - ollama:/root/.ollama # 入れたモデルを、作り直しても残す
   agent:

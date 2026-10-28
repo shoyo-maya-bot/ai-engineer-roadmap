@@ -9,6 +9,8 @@ from roadmap_examples.p07_classify import DEFAULT_EVAL
 from roadmap_examples.p09_lora import (
     BASE_TRAIN,
     SFT_TRAIN,
+    SFT_VAL,
+    choose_rank,
     encode,
     features,
     init_lora,
@@ -61,10 +63,19 @@ def test_merged_model_gives_the_same_answers() -> None:
     assert np.allclose(merged.forward(x)[1], base.forward(x, base.w1 + lora.delta())[1])
 
 
-def test_lora_improves_the_07_eval_set() -> None:
-    run = run_all(load_cases(BASE_TRAIN), load_cases(SFT_TRAIN), load_cases(DEFAULT_EVAL))
-    assert run.reports["lora"].mean > run.reports["base"].mean + 0.1
-    assert run.reports["lora"].mean >= 0.8
+def test_lora_helps_validation_but_not_the_07_eval_set() -> None:
+    """09-2 の本文の表（種 0・r=4）: 検証用では上がるが、07 の評価セットでは上がらない."""
+    run = run_all(
+        load_cases(BASE_TRAIN), load_cases(SFT_TRAIN), load_cases(DEFAULT_EVAL), val_cases=load_cases(SFT_VAL)
+    )
+    assert run.reports["lora_val"].mean > run.reports["base_val"].mean
+    assert run.reports["lora"].mean <= run.reports["base"].mean
+
+
+def test_choose_rank_uses_only_the_validation_set() -> None:
+    best, scores = choose_rank(load_cases(BASE_TRAIN), load_cases(SFT_TRAIN), load_cases(SFT_VAL), [1, 4], epochs=50)
+    assert set(scores) == {1, 4} and best in scores
+    assert scores[best] == max(scores.values())
 
 
 def test_main_prints_the_table() -> None:
@@ -72,3 +83,6 @@ def test_main_prints_the_table() -> None:
     assert main(["--epochs", "20"], stdout=stdout) == 0
     text = stdout.getvalue()
     assert "| LoRA（r=4） |" in text and "| 2,176 |" in text
+    stdout = io.StringIO()
+    assert main(["--epochs", "20", "--ranks", "2,4"], stdout=stdout) == 0
+    assert "選んだ r:" in stdout.getvalue()

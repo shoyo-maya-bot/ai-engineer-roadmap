@@ -1,25 +1,25 @@
-{"id": "g001", "input": "料金の支払いについて教えてください。", "expected": {"category": "billing"}, "tags": ["汎用"]}
-{"id": "g002", "input": "請求の金額を知りたいです。", "expected": {"category": "billing"}, "tags": ["汎用"]}
-{"id": "g003", "input": "支払いの期限はいつですか。", "expected": {"category": "billing"}, "tags": ["汎用"]}
-{"id": "g004", "input": "料金を払う方法を知りたいです。", "expected": {"category": "billing"}, "tags": ["汎用"]}
-{"id": "g005", "input": "請求の明細がほしいです。", "expected": {"category": "billing"}, "tags": ["汎用"]}
-{"id": "g006", "input": "ログインできません。", "expected": {"category": "account"}, "tags": ["汎用"]}
-{"id": "g007", "input": "アカウントを作りたいです。", "expected": {"category": "account"}, "tags": ["汎用"]}
-{"id": "g008", "input": "パスワードを変えたいです。", "expected": {"category": "account"}, "tags": ["汎用"]}
-{"id": "g009", "input": "ユーザー名を変更したいです。", "expected": {"category": "account"}, "tags": ["汎用"]}
-{"id": "g010", "input": "本人確認のやり方を知りたいです。", "expected": {"category": "account"}, "tags": ["汎用"]}
-{"id": "g011", "input": "アプリが動きません。", "expected": {"category": "bug"}, "tags": ["汎用"]}
-{"id": "g012", "input": "画面が表示されません。", "expected": {"category": "bug"}, "tags": ["汎用"]}
-{"id": "g013", "input": "ボタンが反応しません。", "expected": {"category": "bug"}, "tags": ["汎用"]}
-{"id": "g014", "input": "エラーが出ます。", "expected": {"category": "bug"}, "tags": ["汎用"]}
-{"id": "g015", "input": "途中で止まってしまいます。", "expected": {"category": "bug"}, "tags": ["汎用"]}
-{"id": "g016", "input": "契約をやめたいです。", "expected": {"category": "contract"}, "tags": ["汎用"]}
-{"id": "g017", "input": "プランを変えたいです。", "expected": {"category": "contract"}, "tags": ["汎用"]}
-{"id": "g018", "input": "契約の期間を知りたいです。", "expected": {"category": "contract"}, "tags": ["汎用"]}
-{"id": "g019", "input": "契約を更新したいです。", "expected": {"category": "contract"}, "tags": ["汎用"]}
-{"id": "g020", "input": "プランの違いを知りたいです。", "expected": {"category": "contract"}, "tags": ["汎用"]}
-{"id": "g021", "input": "ありがとうございます。", "expected": {"category": "other"}, "tags": ["汎用"]}
-{"id": "g022", "input": "新しい機能の要望です。", "expected": {"category": "other"}, "tags": ["汎用"]}
-{"id": "g023", "input": "営業時間を知りたいです。", "expected": {"category": "other"}, "tags": ["汎用"]}
-{"id": "g024", "input": "感想を送ります。", "expected": {"category": "other"}, "tags": ["汎用"]}
-{"id": "g025", "input": "取材をお願いしたいです。", "expected": {"category": "other"}, "tags": ["汎用"]}
+{"id": "b001", "input": "先月分の請求書をPDFでダウンロードしたいのですが、どの画面から出せますか。", "expected": {"category": "billing", "reason": "請求書の取得方法"}, "tags": ["基本"]}
+{"id": "b002", "input": "10月の利用料が2回引き落とされています。カード明細に4,980円が2件並んでいるので確認をお願いします。", "expected": {"category": "billing", "reason": "二重請求の確認"}, "tags": ["基本"]}
+{"id": "b003", "input": "支払い方法をクレジットカードから銀行振込に切り替えたいです。", "expected": {"category": "billing", "reason": "支払い方法の変更"}, "tags": ["基本"]}
+{"id": "b004", "input": "領収書の宛名を部署名入りの会社名に直して再発行してもらえますか？", "expected": {"category": "billing", "reason": "領収書の再発行"}, "tags": ["基本"]}
+{"id": "b005", "input": "8月末で解約したはずなのに、9月分の請求が届きました。返金してほしいです。", "expected": {"category": "billing", "reason": "解約に触れているが用件は誤請求の返金"}, "tags": ["紛らわしい"]}
+{"id": "b006", "input": "パスワードを忘れてログインできません。再設定の手順を教えてください。", "expected": {"category": "account", "reason": "パスワード再設定"}, "tags": ["基本"]}
+{"id": "b007", "input": "担当者が交代したので、登録しているメールアドレスを変更したいです。", "expected": {"category": "account", "reason": "メールアドレス変更"}, "tags": ["基本"]}
+{"id": "b008", "input": "機種変更をしたら二段階認証のコードが受け取れなくなりました。", "expected": {"category": "account", "reason": "二段階認証の再設定"}, "tags": ["基本"]}
+{"id": "b009", "input": "ログインしようとすると「アカウントがロックされています」と表示されます。解除をお願いできますか。", "expected": {"category": "account", "reason": "エラー表示だが用件はロック解除"}, "tags": ["紛らわしい"]}
+{"id": "b010", "input": "退職した社員のアカウントを停止して、権限を後任に引き継ぎたいです。", "expected": {"category": "account", "reason": "アカウントの停止と権限移行"}, "tags": ["基本"]}
+{"id": "b011", "input": "顧客一覧画面を開くと真っ白のままで何も表示されません。ブラウザはChromeです。", "expected": {"category": "bug", "reason": "画面が表示されない"}, "tags": ["基本"]}
+{"id": "b012", "input": "CSV出力ボタンを押すと「E-502 処理に失敗しました」と出て出力できません。", "expected": {"category": "bug", "reason": "エラーで出力できない"}, "tags": ["基本"]}
+{"id": "b013", "input": "昨日登録した案件データがダッシュボードに反映されていません。", "expected": {"category": "bug", "reason": "データが表示されない"}, "tags": ["基本"]}
+{"id": "b014", "input": "請求書発行画面で「発行」ボタンを押しても何も反応せず、請求書が作れません。", "expected": {"category": "bug", "reason": "請求書の話だが用件は画面の不具合"}, "tags": ["紛らわしい"]}
+{"id": "b015", "input": "スマホアプリでカレンダーを開くたびにアプリが落ちます。", "expected": {"category": "bug", "reason": "アプリの強制終了"}, "tags": ["基本"]}
+{"id": "b016", "input": "スタンダードからプロプランに上げたいのですが、月の途中でも切り替えられますか。", "expected": {"category": "contract", "reason": "プランの上位変更"}, "tags": ["基本"]}
+{"id": "b017", "input": "来年3月末で解約したいので、手続きの流れを教えてください。", "expected": {"category": "contract", "reason": "解約手続き"}, "tags": ["基本"]}
+{"id": "b018", "input": "年契約が12月で切れますが、自動更新は止めておきたいです。", "expected": {"category": "contract", "reason": "自動更新の停止"}, "tags": ["基本"]}
+{"id": "b019", "input": "利用ユーザーを20人から35人に増やしたいです。料金はどれくらい変わりますか。", "expected": {"category": "contract", "reason": "料金も聞いているが用件は契約内容の変更"}, "tags": ["紛らわしい"]}
+{"id": "b020", "input": "無料トライアルが終わったあと、有料プランに移るにはどうすればいいですか。", "expected": {"category": "contract", "reason": "有料プランへの移行"}, "tags": ["基本"]}
+{"id": "b021", "input": "いつも便利に使わせてもらっています。先日のサポートの方の対応がとても丁寧で助かりました。", "expected": {"category": "other", "reason": "お礼"}, "tags": ["基本"]}
+{"id": "b022", "input": "ガントチャート表示の機能を追加していただけないでしょうか。", "expected": {"category": "other", "reason": "機能の要望"}, "tags": ["基本"]}
+{"id": "b023", "input": "社内で導入を提案したいので、サービス紹介の資料があれば送ってください。", "expected": {"category": "other", "reason": "資料の依頼"}, "tags": ["基本"]}
+{"id": "b024", "input": "エラーではないのですが、一覧の並び順を日付の新しい順で固定できる設定がほしいです。", "expected": {"category": "other", "reason": "不具合ではなく機能の要望"}, "tags": ["紛らわしい"]}
+{"id": "b025", "input": "来月開催予定のオンライン操作説明会の日程を知りたいです。", "expected": {"category": "other", "reason": "説明会の問い合わせ"}, "tags": ["基本"]}

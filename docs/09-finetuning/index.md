@@ -23,8 +23,9 @@
 
 小さなモデルを LoRA で調整し、07 の評価セットで前後を比べる（[09-2](09-2-sft-lora-qlora.md)）
 
-- 実行: `uv run python -m roadmap_examples.p09_lora --out results-lora.jsonl`（LLM もネットワークも使わない。数秒で終わる）
-- 学習の例: `examples/data/p09/sft_train.jsonl`（40 件. 07 の評価セットと同じ文章が無いことをテストで確かめている）
+- 実行: `uv run python -m roadmap_examples.p09_lora --ranks 1,2,4,8 --out results-lora.jsonl`（r は検証用の例で選び、07 の評価セットは最後に 1 回だけ測る。LLM もネットワークも使わない。数秒で終わる）
+- 学習の例: `examples/data/p09/`（汎用 25 件・業務 40 件・検証用 10 件。07 の評価セットを見ていない人が書いた。完全一致は無く、似すぎた組は 09-1 の `nearest_pairs` で確かめた）
+- 結果: 検証用では LoRA で点が上がるが、07 の評価セットでは上がらない（09-2 で読み方を説明。学習をやめる判断の例）
 - 本物の LLM で試す場合: `uv run python -m roadmap_examples.p09_sft --out sft.jsonl` で学習の例を書き出し、09-2 の手順で学習して Ollama に取り込む（任意）
 
 判断の基準（[09-1](09-1-finetune-or-rag.md)）は 13 の設計書の「RAG か学習か」で使います。

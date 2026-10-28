@@ -111,8 +111,10 @@ API ではその場で人に聞けないので、書き換えのツールに来�
     def approve(self, environ: dict[str, Any], request_id: str) -> tuple[int, dict[str, Any]]:
         if not self.approver_token:
             return 403, {"error": "承認の API は無効です（APPROVER_TOKEN が設定されていません）"}
-        given = environ.get("HTTP_AUTHORIZATION", "").removeprefix("Bearer ")
-        if not hmac.compare_digest(given.encode("utf-8"), self.approver_token.encode("utf-8")):
+        scheme, _, given = environ.get("HTTP_AUTHORIZATION", "").partition(" ")
+        if scheme.lower() != "bearer" or not hmac.compare_digest(
+            given.encode("utf-8"), self.approver_token.encode("utf-8")
+        ):
             return 401, {"error": "承認の係の鍵が違います"}
         code, data = self.read_json(environ)
         if code or not isinstance(data.get("approved"), bool):
@@ -127,10 +129,13 @@ API ではその場で人に聞けないので、書き換えのツールに来�
         return self.run(request_id, "/approvals", question, state, Fixed(decision))
 ```
 
+- `Authorization` は「方式 鍵」の形なので、空白で分けて、方式が `Bearer` であることも確かめます
 - 鍵の比べ方は `hmac.compare_digest` です。ふつうの `==` は、違う文字が見つかった所で比べるのをやめるので、かかった時間から鍵を推し量られる恐れがあります
   （[公式ドキュメント: hmac.compare_digest](https://docs.python.org/ja/3/library/hmac.html#hmac.compare_digest)）
 - 鍵が設定されていなければ、承認の API そのものを無効にします（`403`）。鍵の付け忘れで、誰でも承認できる状態になるのを防ぎます
 - 保存した状態（10-2）から続きを動かすので、承認が翌日でも、サーバーを再起動していても動きます。承認が済んだ状態のファイルは消します
+- 承認待ちのファイル（`var/pending/`）には、会話（質問の本文）が入っています。承認されないまま放っておくと残り続けるので、
+  期限（例: 7 日）を決め、それより古い承認待ちのファイルは消す運用にします（ファイルの更新日時で選んで消す。12 のコードには入れていません）
 
 この流れは、テストで確かめています。
 
@@ -147,6 +152,12 @@ def test_issue_waits_for_approval_then_continues(tmp_path: Path) -> None:
 
     assert call(app, "POST", f"/approvals/{request_id}", {"approved": True})[0] == 401  # 鍵が無い
     assert call(app, "POST", f"/approvals/{request_id}", {"approved": True}, token="wrong")[0] == 401
+    basic = {"REQUEST_METHOD": "POST", "PATH_INFO": f"/approvals/{request_id}", "HTTP_AUTHORIZATION": f"Basic {TOKEN}"}
+    basic |= {"CONTENT_LENGTH": "18", "wsgi.input": io.BytesIO(b'{"approved": true}')}
+    setup_testing_defaults(basic)
+    status: list[str] = []
+    app(basic, lambda s, _h: status.append(s))
+    assert status[0].startswith("401")  # Bearer 以外の書き方は受け付けない
     status, body = call(app, "POST", f"/approvals/{request_id}", {"approved": True}, token=TOKEN)
     assert status == 200 and body["answer"] == "起票しました"
     assert [i.title for i in tracker.issues] == ["延長の回数が資料に無い"]
@@ -299,10 +310,11 @@ def test_validation():
         承認は、いつ返ってくるか分からないからです。その場で待つと接続が切れ、途中の状態も失われます。
         状態を保存して `202` を返せば、承認が翌日でも、続きから動かせます。
 
-3. 承認の API を、質問の API とは別の鍵で守るのはなぜですか。
+3. 12 の API では、質問の API には鍵を付けず（自分の PC だけで待ち受ける）、承認の API だけに鍵を付けています。承認の API を分けて鍵で守るのはなぜですか。
 
     ??? note "答え"
         質問を送る人が、自分で承認できてはいけないからです。承認は、書き換えを確かめる係だけができるようにします。
+        質問の API に鍵が無いのは、自分の PC だけで待ち受けているからです。ほかの PC に開くときは、質問の API にも認証を付けます（12-3）。
         鍵が設定されていなければ、承認の API そのものを無効にして、付け忘れで誰でも承認できる状態を防ぎます。
 
 4. FastAPI で本文の形を型（`AskBody`）で書くと、何をしてくれますか。

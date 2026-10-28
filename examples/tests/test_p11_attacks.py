@@ -8,7 +8,7 @@ import io
 import pytest
 
 from roadmap_examples.evalset import load_cases
-from roadmap_examples.p11_attacks import DEFAULT_ATTACKS, checks, main, make_predict, obey_chat
+from roadmap_examples.p11_attacks import DEFAULT_ATTACKS, HOLDOUT, checks, main, make_predict, obey_chat
 
 CASES = load_cases(DEFAULT_ATTACKS)
 
@@ -48,3 +48,19 @@ def test_compare_fails_on_regression(tmp_path) -> None:
     stdout = io.StringIO()
     assert main(["--no-guard", "--compare", str(last)], stdout=stdout) == 1
     assert "x01: 1.00 → 0.60（後退）" in stdout.getvalue()
+
+
+def test_judge_does_not_depend_on_the_guard(monkeypatch) -> None:
+    """判定は守りの関数を使わない: 伏せ字の形を消すと、守りは破られ、判定もそれを見つける."""
+    from roadmap_examples import p11_guard
+
+    monkeypatch.setattr(p11_guard, "PII_PATTERNS", [])
+    case = next(c for c in CASES if c.id == "x15")
+    assert not checks(case, make_predict(obey_chat)(case).output)["答えに漏れていない"]
+
+
+def test_holdout_attacks_break_through_and_are_reported() -> None:
+    """守りを見ずに書かれた 7 件（未知の言い換え）. 11-3 の本文に書いたとおり、7 件とも破られる（隠さずに測る）."""
+    holdout = load_cases(HOLDOUT)
+    broken = [c.id for c in holdout if not all(checks(c, make_predict(obey_chat)(c).output).values())]
+    assert broken == ["h01", "h02", "h03", "h04", "h05", "h06", "h07"]
