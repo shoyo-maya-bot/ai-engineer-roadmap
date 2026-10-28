@@ -9,9 +9,11 @@ license = "MIT"
 requires-python = ">=3.12"
 # 実行に使う依存. 部が進むと足す（足したら uv lock で uv.lock を更新する）
 dependencies = [
-    "numpy>=2.3",       # 08: エンベディングのベクトル検索
-    "openpyxl>=3.1.5",  # 08: Excel の取り込み
-    "pypdf>=6.1",       # 08: PDF の取り込み
+    "numpy>=2.3",          # 02: ベクトルと勾配の計算. 08: エンベディングのベクトル検索
+    "openpyxl>=3.1.5",     # 08: Excel の取り込み
+    "pandas>=3.0",         # 03: 表の整理と前処理
+    "pypdf>=6.1",          # 08: PDF の取り込み
+    "scikit-learn>=1.7",   # 02: 線形回帰の照合. 03: 前処理のパイプライン（04 でも使う）
 ]
 
 [project.scripts]
