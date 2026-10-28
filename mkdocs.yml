@@ -97,8 +97,28 @@ nav:
               - 03-3 解答: 03-data/answers/03-3.md
               - 03-4 解答: 03-data/answers/03-4.md
   - 機械学習・深層学習:
-      - 04 機械学習: 04-ml/index.md
-      - 05 ディープラーニング: 05-deep-learning/index.md
+      - 04 機械学習:
+          - 04-ml/index.md
+          - 04-1 回帰と分類: 04-ml/04-1-regression-classification.md
+          - 04-2 決定木・ランダムフォレスト: 04-ml/04-2-trees-forests.md
+          - 04-3 クラスタリング: 04-ml/04-3-clustering.md
+          - 04-4 指標・交差検証・過学習: 04-ml/04-4-metrics-validation.md
+          - 解答:
+              - 04-1 解答: 04-ml/answers/04-1.md
+              - 04-2 解答: 04-ml/answers/04-2.md
+              - 04-3 解答: 04-ml/answers/04-3.md
+              - 04-4 解答: 04-ml/answers/04-4.md
+      - 05 ディープラーニング:
+          - 05-deep-learning/index.md
+          - 05-1 ニューラルネットワークと誤差逆伝播: 05-deep-learning/05-1-backprop.md
+          - 05-2 PyTorch の学習ループ: 05-deep-learning/05-2-pytorch-loop.md
+          - 05-3 文章の扱い（RNN からアテンションへ）: 05-deep-learning/05-3-rnn-attention.md
+          - 05-4 トランスフォーマーを小さく実装する: 05-deep-learning/05-4-small-transformer.md
+          - 解答:
+              - 05-1 解答: 05-deep-learning/answers/05-1.md
+              - 05-2 解答: 05-deep-learning/answers/05-2.md
+              - 05-3 解答: 05-deep-learning/answers/05-3.md
+              - 05-4 解答: 05-deep-learning/answers/05-4.md
   - LLM 応用:
       - 06 LLM の基礎:
           - 06-llm-basics/index.md
