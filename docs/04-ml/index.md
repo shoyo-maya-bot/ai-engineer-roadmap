@@ -6,7 +6,7 @@
 ## 前提
 
 - 前提の部: [02 AI のための数学](../02-math/index.md)・[03 データエンジニアリング](../03-data/index.md)
-- 演習では、整え済みの架空の問い合わせ（`examples/data/p04/train.jsonl`、100 件）で学習し、07 と同じ評価セット（`examples/data/p07/inquiries.jsonl`、30 件）で測ります。03 を後回しにしても進められます。03 の成果物（`examples/data/p03/inquiries_clean.csv`）で学習し直す演習は [04-4](04-4-metrics-validation.md) にあります。
+- 演習では、03 の成果物（`examples/data/p03/inquiries_clean.csv`、架空の問い合わせ 130 件）の本文と分類で学習し、07 と同じ評価セット（`examples/data/p07/inquiries.jsonl`、30 件）で測ります。整えた表はリポジトリにあるので、03 を後回しにしても進められます。
 - ライブラリは scikit-learn を使います（`examples/` の `uv sync --locked` で入ります）。GPU も LLM も使いません。
 
 ## 章の一覧
@@ -24,9 +24,9 @@
 
 問い合わせの自動分類モデルと評価レポート（[04-4](04-4-metrics-validation.md) の「04 の成果物: 評価レポート」）
 
-- モデル: 文字の組の TF-IDF + ロジスティック回帰（`examples/src/roadmap_examples/p04_classify.py`）
+- モデル: 文字の組の TF-IDF + ロジスティック回帰。03 の成果物の本文と分類だけで学習（`examples/src/roadmap_examples/p04_classify.py`）
 - 実行: `uv run python -m roadmap_examples.p04_classify --out results-p04.jsonl --report report-p04.md`
-- 評価セットでの正解率は 96.7%（07 の仮のルールベース分類は 66.7%）。学習データの交差検証では 67.0% です
+- 評価セットでの正解率は 80.0%（30 件中 24 件。07 の仮のルールベース分類は 66.7%）。学習データの交差検証では 73.8% です
 
 07 で、同じ評価セットを使って LLM での分類と比べる基準にします。07 の仮のルールベース分類からの差し替え方は、
 [04-4](04-4-metrics-validation.md) の「07 の基準を差し替える」にあります。

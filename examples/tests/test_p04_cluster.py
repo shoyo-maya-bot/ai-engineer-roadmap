@@ -1,7 +1,6 @@
 """p04_cluster.py のテスト（04-3 クラスタリング）."""
 
-from roadmap_examples.evalset import load_cases
-from roadmap_examples.p04_classify import DEFAULT_TRAIN, texts_and_labels
+from roadmap_examples.p04_classify import DEFAULT_TRAIN, load_train, texts_and_labels
 from roadmap_examples.p04_cluster import agreement, cluster_members, cluster_texts, silhouette_by_k
 
 GROUPS = ["多い"] * 6 + ["問い合わせ多い"] * 6 + ["使っていない"] * 6
@@ -22,7 +21,7 @@ def test_silhouette_picks_three() -> None:
 
 
 def test_text_clusters_do_not_match_human_categories() -> None:
-    texts, truth = texts_and_labels(load_cases(DEFAULT_TRAIN))
+    texts, truth = texts_and_labels(load_train(DEFAULT_TRAIN))
     labels, terms = cluster_texts(texts, 5)
     assert len(set(labels)) == 5
     assert all(len(t) == 5 for t in terms)

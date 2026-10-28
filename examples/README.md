@@ -19,8 +19,7 @@ uv run api-to-csv --help
 | `notebooks/p02_linreg.py` | 02 | 02 の成果物: 線形回帰を勾配降下で解き、最小二乗・scikit-learn と照合するノートブック（`# %%` のセルの形式） |
 | `src/roadmap_examples/p03_*.py` | 03 | 汚れた問い合わせデータを整えるパイプライン（03 の成果物）・SQL と pandas の集計・特徴量と前処理 |
 | `data/p03/` | 03 | 03 の題材（架空の汚れた問い合わせ 147 件と顧客 40 人）と、整えた表（130 件. 分類は 07 の評価セットと同じ 5 種類） |
-| `src/roadmap_examples/p04_*.py` | 04 | 回帰・決定木とランダムフォレスト・クラスタリング・指標と過学習・成果物（問い合わせの分類モデルと評価レポート. scikit-learn） |
-| `data/p04/train.jsonl` | 04 | 04 の分類モデルの学習データ（架空の問い合わせ 100 件. 07 の評価セットと同じ形式・同じ分類） |
+| `src/roadmap_examples/p04_*.py` | 04 | 回帰・決定木とランダムフォレスト・クラスタリング・指標と過学習・成果物（問い合わせの分類モデルと評価レポート. 03 の整えた表で学習し、07 の評価セットで測る. scikit-learn） |
 | `src/roadmap_examples/p05_*.py` | 05 | 誤差逆伝播・学習ループ（SGD・Adam・早期終了）・RNN とアテンション・成果物（小さな文字単位の言語モデル. どれも NumPy） |
 | `src/roadmap_examples/llm.py` | 06 以降 | LLM を呼ぶ部分のインターフェース（`LLMClient`）と、テスト用の偽の実装（`FakeLLM`）・呼び出し回数の上限（`LimitedLLM`） |
 | `src/roadmap_examples/p06_*.py` | 06 | 小さな BPE とコサイン類似度・temperature とコンテキストに収める処理・チャットのテンプレート・成果物（モデルの比べる表） |

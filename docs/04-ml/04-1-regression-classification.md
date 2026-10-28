@@ -30,7 +30,7 @@ flowchart LR
 
 ## なぜ必要か
 
-07 では、比べる基準として「キーワードで振り分ける規則」を手で書きました。30 件中 20 件しか当たりません。
+07 で比べる基準に使う仮のルールベース分類は、キーワードで振り分ける規則を手で書いたものです。07 の評価セットの 30 件中 20 件しか当たりません。
 
 - 「請求」という語があれば billing、のような規則は、言い回しが少し違うだけで外れる
 - 規則を足すほど、規則どうしがぶつかる（「ログインボタンでエラー」は bug か account か）
@@ -103,7 +103,7 @@ def test_regression_learns_the_trend_and_beats_the_mean() -> None:
 
     既定の分け方では、空白も記号も無い日本語の文は、句点までがまるごと 1 語になります。
     どの文も別の語になり、「請求書」が共通していることをモデルが使えません。
-    手元で試すと、このモデルの評価セットでの正解は 30 件中 8 件でした。評価セットの文の語が学習データとほとんど一致せず、
+    手元で試すと、このモデルの評価セットでの正解は 30 件中 6 件でした。評価セットの文の語が学習データとほとんど一致せず、
     予測がほぼ当て推量になるためです（分類ごとの点数がほぼ同じなので、環境によって数件変わります）。
 
 !!! success "良い例"
@@ -146,38 +146,39 @@ def top_features(model: Pipeline, label: str, n: int = 5) -> list[str]:
     return [str(names[i]) for i in row.argsort()[::-1][:n]]
 ```
 
-手元で実行すると、billing の上位は「書」「請」「求」「請求」「金」、contract の上位は「約」「契約」「契」「たい」「プラ」でした。
-人が規則に書きそうな語を、例から見つけています。一方、bug の上位には「が」「と、」「ると」のような語尾も入ります。
-「〜すると、〜が〜しません」という不具合の書き方の癖を、手がかりにしているためです。
+手元で実行すると、billing の上位は「書」「請」「請求」「求」「払」、contract の上位は「約」「契約」「契」「プ」「ラン」でした。
+人が規則に書きそうな語を、例から見つけています。一方、bug の上位には「が」「と」「され」「ると」のような語尾も入ります。
+「〜すると、〜が〜されません」という不具合の書き方の癖を、手がかりにしているためです。
 
 ### 07 の評価セットで測る
 
-学習データ（`examples/data/p04/train.jsonl`、架空の 100 件）で学習し、07 の評価セット（30 件）で測ります。
-評価セットは学習に使いません。
+学習データは、03 の成果物（`examples/data/p03/inquiries_clean.csv`、架空の 130 件）の本文（`input`）と分類（`category`）です。
+07 の評価セット（30 件）で測ります。評価セットは学習に使いません。
+03 の表には対応にかかった時間（`response_minutes`）もありますが、問い合わせが届いた時点では分からない値なので使いません（03-4）。
+文字の組の TF-IDF は、03 の `build_preprocessor(text_only=True)` と同じ設定です。
 
 <!-- src: examples/tests/test_p04_classify.py -->
 ```python title="examples/tests/test_p04_classify.py"
 def test_model_beats_the_07_rule_on_the_eval_set(model) -> None:
     report = run_eval(load_cases(DEFAULT_EVAL), model_predict(model), exact_match("category"))
-    assert sum(r.score for r in report.results) == 29  # 07 の仮のルールベースは 20 件
-    assert [r.id for r in report.results if r.score < 1] == ["c003"]
+    assert sum(r.score for r in report.results) == 24  # 07 の仮のルールベースは 20 件
+    assert [r.id for r in report.results if r.score < 1] == ["c002", "c009", "c011", "c023", "c025", "c026"]
 ```
 
-30 件中 29 件が正解でした。ただし、評価セットは 30 件と小さく、この数字をそのまま信じてよいかは 04-4 で確かめます。
+30 件中 24 件（80.0%）が正解でした。ただし、評価セットは 30 件と小さく、この数字をどこまで信じてよいかは 04-4 で確かめます。
 
 `predict_proba` で、分類ごとの確率も出せます。
 
 ```python
-from roadmap_examples.evalset import load_cases
-from roadmap_examples.p04_classify import DEFAULT_TRAIN, train
+from roadmap_examples.p04_classify import DEFAULT_TRAIN, load_train, train
 
-model = train(load_cases(DEFAULT_TRAIN))
+model = train(load_train(DEFAULT_TRAIN))
 print(model.classes_)
 print(model.predict_proba(["請求書を再発行してください"]).round(2))
 ```
 
-手元では billing の確率が 0.36 で最も高く、ほかは 0.13〜0.19 でした。答えは合っていても、確率は高くありません。
-学習データが 100 件と少なく、重みが控えめに付くためです。確率を「自信」として使う前に、本当にその割合で当たるかを確かめます。
+手元では billing の確率が 0.51 で最も高く、ほかは 0.09〜0.17 でした。答えは合っていても、確率は半分ほどです。
+学習データが 130 件と少なく、重みが控えめに付くためです。確率を「自信」として使う前に、本当にその割合で当たるかを確かめます。
 
 ## 演習
 

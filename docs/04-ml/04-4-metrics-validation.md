@@ -17,7 +17,7 @@
 
 ```mermaid
 flowchart TB
-  subgraph 学習データ["学習データ（100 件）を 5 つに分ける"]
+  subgraph 学習データ["学習データ（130 件）を 5 つに分ける"]
     direction LR
     A1["1"] --- A2["2"] --- A3["3"] --- A4["4"] --- A5["5"]
   end
@@ -82,10 +82,9 @@ def test_accuracy_trap() -> None:
 
 !!! failure "悪い例"
     ```python
-    from roadmap_examples.evalset import load_cases
-    from roadmap_examples.p04_classify import DEFAULT_TRAIN, texts_and_labels, train
+    from roadmap_examples.p04_classify import DEFAULT_TRAIN, load_train, texts_and_labels, train
 
-    cases = load_cases(DEFAULT_TRAIN)
+    cases = load_train(DEFAULT_TRAIN)
     model = train(cases)
     print(model.score(*texts_and_labels(cases)))  # 学習に使ったデータで測る
     ```
@@ -115,15 +114,15 @@ def depth_curve(cases: Sequence[EvalCase], depths: Sequence[int | None]) -> list
     return rows
 ```
 
-手元の結果です（学習データ 100 件）。
+手元の結果です（学習データは 03 の成果物の 130 件）。
 
 | 深さの上限 | 1 | 2 | 4 | 8 | 16 | なし |
 |---|---:|---:|---:|---:|---:|---:|
-| 学習データの正解率 | 30% | 46% | 69% | 98% | 100% | 100% |
-| 交差検証の正解率 | 28% | 34% | 51% | 43% | 41% | 41% |
+| 学習データの正解率 | 32% | 42% | 62% | 85% | 99% | 100% |
+| 交差検証の正解率 | 32% | 35% | 50% | 51% | 50% | 50% |
 
-深くするほど学習データの正解率は 100% に近づきますが、交差検証の正解率は深さ 4 で頭打ちになり、その後は下がります。
-2 つの差が開き始めたところが、過学習の始まりです（`test_deep_trees_overfit`）。
+深くするほど学習データの正解率は 100% に近づきますが、交差検証の正解率は深さ 4 で頭打ちになり、その後は横ばいです。
+深くした分は、新しいデータには効かない「覚えた違い」に使われています。2 つの差が開き始めたところが、過学習の始まりです（`test_deep_trees_overfit`）。
 
 ### 交差検証で比べる
 
@@ -142,11 +141,11 @@ def cross_validate(cases: Sequence[EvalCase], model: Pipeline | None = None, fol
   学習データは分類ごとに並んでいるので、ただの `KFold` で混ぜずに分けると、ある分類が検証にしか無い、ということが起きます
 - `random_state` を固定して、毎回同じ分け方にします。比べるモデルどうしで、分け方をそろえるためです
 
-04 のモデルの交差検証の正解率は、平均 67.0%、標準偏差 10.8% でした。5 回の成績は 50〜80% とばらつきます。
-1 回の検証は 20 件なので、1 件で 5 ポイント動くからです。
+04 のモデルの交差検証の正解率は、平均 73.8%、標準偏差 10.4% でした。5 回の成績は 54〜85% とばらつきます。
+1 回の検証は 26 件なので、1 件で約 3.8 ポイント動くからです。
 
-設定（文字の組の長さ 1〜3 と、正則化の強さ C）を 9 通り試すと、平均は 66〜70%、標準偏差は 7〜12% でした。
-差が標準偏差よりずっと小さいので、「どれも同じくらい」と判断し、既定の設定（1〜2 文字・C = 1.0）のままにしています。
+設定（文字の組の長さ 1〜3 と、正則化の強さ C）を 9 通り試すと、平均は 68〜77%、標準偏差は 4〜12% でした（04-4 の演習 2）。
+差が標準偏差と同じくらいなので、「どれも同じくらい」と判断し、既定の設定（1〜2 文字・C = 1.0）のままにしています。
 
 ### データ漏れを防ぐ
 
@@ -156,6 +155,7 @@ def cross_validate(cases: Sequence[EvalCase], model: Pipeline | None = None, fol
 - 前処理（TF-IDF の語彙）を全部のデータで作ってから分けると、検証のデータの語彙が学習に漏れる。
   `Pipeline` を交差検証に渡せば、分割ごとに学習の部分だけで前処理を作り直す
 - 学習データと評価セットに同じ文が入っていると、答えを見せた試験になる。成果物の CLI は、同じ文があれば止める
+- 対応にかかった時間（03 の `response_minutes`）のように、問い合わせが届いた時点では分からない列を特徴量にしない（03-4）
 
 <!-- src: examples/src/roadmap_examples/p04_classify.py -->
 ```python title="examples/src/roadmap_examples/p04_classify.py"
@@ -164,6 +164,64 @@ def overlap(train_cases: Sequence[EvalCase], eval_cases: Sequence[EvalCase]) -> 
     seen = {c.input.strip() for c in train_cases}
     return sorted({c.input for c in eval_cases if c.input.strip() in seen})
 ```
+
+`overlap` が見つけられるのは、空白を除いて一字一句同じ文だけです。次の「言い換え」は見つけられません。
+
+### 言い換えによる漏れ
+
+評価セットの文を読んでから学習データを書くと、文字は違っても中身が同じ文（言い換え）が学習データに入ります。
+答えの言い回しを変えて教えたのと同じで、評価セットの成績だけが良くなります。
+人が架空のデータを書くとき、とくに起きやすい漏れです。
+
+!!! failure "悪い例"
+    評価セットで 04 のモデルが誤った 6 件を読み、「この言い方も覚えさせよう」と、その言い換えを学習データに足す。
+
+    <!-- src: examples/tests/test_p04_classify.py -->
+    ```python title="examples/tests/test_p04_classify.py"
+    def test_paraphrase_leak_inflates_only_the_eval_score() -> None:
+        eval_cases = load_cases(DEFAULT_EVAL)
+        base = load_train(DEFAULT_TRAIN)
+        leaky = base + PARAPHRASES
+        assert overlap(leaky, eval_cases) == []  # 完全一致の確かめでは見つからない
+        before = run_eval(eval_cases, model_predict(train(base)), exact_match("category")).mean
+        after = run_eval(eval_cases, model_predict(train(leaky)), exact_match("category")).mean
+        assert (round(before * 30), round(after * 30)) == (24, 29)  # 評価セットだけが大きく上がる
+        assert abs(cross_validate(leaky).mean - cross_validate(base).mean) < 0.05  # 交差検証はほとんど変わらない
+    ```
+
+    6 文を足しただけで、評価セットの正解率は 80.0% から 96.7% に上がりました。交差検証は 73.8% から 77.1% で、ほとんど変わりません。
+    評価セットの数字だけが良くなったのは、モデルが良くなったのではなく、評価セットの答えを覚えたからです。
+
+!!! success "良い例"
+    - 評価セットは、学習データより先に、別の人が作る（または、学習データと別の時期・別の窓口から取る）
+    - 評価セットで誤った件を直したくなったら、その件は評価セットから外して学習データに移し、評価セットには新しい件を足す
+    - 評価セットの成績と交差検証の成績の差が、測る誤差（下の「数字の読み方」）より大きければ、漏れを疑う
+
+機械で見つける手がかりとして、成果物は、評価セットの各件にいちばん近い学習データの組をレポートに並べます（`nearest_pairs`）。
+
+<!-- src: examples/src/roadmap_examples/p04_classify.py -->
+```python title="examples/src/roadmap_examples/p04_classify.py"
+def nearest_pairs(
+    train_cases: Sequence[EvalCase], eval_cases: Sequence[EvalCase], n: int = 5
+) -> list[tuple[float, EvalCase, EvalCase]]:
+    """評価セットの各件にいちばん近い学習データ（2 文字の組の TF-IDF のコサイン類似度）を、近い順に n 組.
+
+    完全一致（overlap）では見つからない言い換えの候補を、人が読むためのもの.
+    類似度だけでは、言い換えかどうかを決められない.
+    """
+    vectorizer = TfidfVectorizer(analyzer="char", ngram_range=(2, 2)).fit(
+        [c.input for c in [*train_cases, *eval_cases]]
+    )
+    sims = linear_kernel(
+        vectorizer.transform([c.input for c in eval_cases]), vectorizer.transform([c.input for c in train_cases])
+    )  # TF-IDF は長さ 1 にそろえてあるので、内積がコサイン類似度
+    pairs = [(float(row.max()), e, train_cases[int(row.argmax())]) for row, e in zip(sims, eval_cases, strict=True)]
+    return sorted(pairs, key=lambda p: (-p[0], p[1].id))[:n]
+```
+
+上の悪い例の 6 文を足すと、ほぼ同じ文（類似度 0.78〜0.83）と、少し変えた文（0.54）は、近い組の上位に出ました。
+一方、言い回しを大きく変えた 3 文（0.30〜0.41）は、もともとある話題の近い文（0.41〜0.47）に埋もれて出ませんでした。
+類似度は、人が読む候補を絞る道具で、言い換えかどうかは決められません。最後は、組を人が読んで確かめます。
 
 ### 04 の成果物: 評価レポート
 
@@ -178,7 +236,7 @@ uv run python -m roadmap_examples.p04_classify --out results-p04.jsonl --report 
 ```text
 ## 交差検証（学習データの中だけで測る）
 
-- 正解率: 平均 67.0%（標準偏差 10.8%、5 分割）
+- 正解率: 平均 73.8%（標準偏差 10.4%、5 分割）
 
 ## 評価セットでの比較
 
@@ -186,27 +244,28 @@ uv run python -m roadmap_examples.p04_classify --out results-p04.jsonl --report 
 |---|---:|---:|---:|---:|---:|
 | 多数派（常に同じ分類） | 20.0% | 0.067 | 21.1% | 0.0% | 22.2% |
 | 07 の仮のルールベース | 66.7% | 0.659 | 84.2% | 100.0% | 22.2% |
-| 04 のモデル | 96.7% | 0.966 | 94.7% | 100.0% | 100.0% |
+| 04 のモデル | 80.0% | 0.801 | 78.9% | 100.0% | 77.8% |
 ```
 
-レポートには、このほかに分類ごとの適合率・再現率・F1、混同行列、誤った件の一覧が入ります。
-04 のモデルが誤ったのは c003（「支払い方法を口座振替に変えたいです。」正解 billing → 予測 contract）の 1 件でした。
+レポートには、このほかに分類ごとの適合率・再現率・F1、混同行列、誤った件の一覧、評価セットに近い学習データの組が入ります。
+04 のモデルが誤ったのは 6 件で、うち 5 件は billing か bug と答えたものでした。
+例えば c002（「クレジットカードの決済が同じ日に 2 回ありました。」正解 billing）を bug と、c025（お礼の文、正解 other）を billing と答えています。
 
-**数字の読み方**: 評価セットでは 96.7% ですが、学習データの交差検証では 67.0% でした。差が大きいので、理由を考えます。
+**数字の読み方**: 評価セットでは 80.0%、学習データの交差検証では 73.8% でした。この差（約 6 ポイント）は、測る誤差の範囲です。
 
-- 交差検証の各回は 80 件で学習しているが、最終のモデルは 100 件で学習している
-- 学習データには、窓口をまたぐ言い回しの紛らわしい件を、わざと多めに入れてある
-- 評価セットは 30 件と小さく、1 件で 3.3 ポイント動く
-- 学習データも評価セットも、同じ人が同じ判断の基準で書いた架空のデータで、言い回しが似ている
+- 評価セットは 30 件なので、1 件で 3.3 ポイント動く。正解率 80% を 30 件で測ったときの標準誤差は √(0.8 × 0.2 ÷ 30) ≒ 7.3 ポイントで、
+  「本当の正解率」はおおよそ 65〜95% のどこか、としか言えない
+- 交差検証は 130 件すべてを 1 回ずつ検証に使うので、ぶれは小さめ（標準誤差は約 3.9 ポイント）だが、各回の成績は 54〜85% とばらつく
+- 2 つの数字の差が標準誤差より小さいので、「評価セットだけが良すぎる」（漏れの疑い）とは言えない
 
-そのため、レポートの結論は「07 の評価セットでは 96.7% で、仮のルールベースより 30 ポイント高い。
-ただし交差検証では 67% で、新しい言い回しの問い合わせでは、もっと低く見積もるべき」とします。
+そのため、レポートの結論は「07 の評価セットで 80.0%、仮のルールベースより 13 ポイント高い。
+評価セットが 30 件と小さいので、新しい問い合わせでは 70〜80% 程度と見積もる」とします。
 このように、良い数字だけでなく、測り方と限界も書くのが評価レポートです。
 
 ### 07 の基準を差し替える
 
-07 は、04 の結果がまだ無いため「仮のルールベース分類」を基準にしています（07-5 の「比べる基準について」）。
-04 の成果物ができたので、次のどちらかで差し替えます。07 のコードと評価セットはそのまま使えます。
+07 の `--mode baseline` は、04 を飛ばした人のための「仮のルールベース分類」です（07-5 の「比べる基準について」）。
+04 を進めた人は、次のどちらかで 04 のモデルに差し替えます。07 のコードと評価セットはそのまま使えます。
 
 **方法 1（コマンド）**: 04 の結果のファイルを、07 の `--compare` に渡します。
 
@@ -231,7 +290,7 @@ def test_results_can_replace_the_07_baseline(tmp_path: Path) -> None:
         ["--mode", "ollama", "--model", "m", "--compare", str(base)], llm=FakeLLM.of(replies), stdout=stdout
     )
     assert code == 0
-    assert "前回からの変化: 1 件" in stdout.getvalue()  # 04 のモデルが誤った c003 だけ
+    assert "前回からの変化: 6 件" in stdout.getvalue()  # 04 のモデルが誤った 6 件
 ```
 
 **方法 2（コード）**: 07 の `baseline_predict` の代わりに、04 のモデルの予測の関数を `run_eval` に渡します。
@@ -250,12 +309,12 @@ def model_predict(model: Pipeline) -> Predict:
 
 ```python
 from roadmap_examples.evalset import exact_match, load_cases, run_eval
-from roadmap_examples.p04_classify import DEFAULT_TRAIN, model_predict, train
+from roadmap_examples.p04_classify import DEFAULT_TRAIN, load_train, model_predict, train
 from roadmap_examples.p07_classify import DEFAULT_EVAL, summary
 from roadmap_examples.p07_cost import Price
 
 cases = load_cases(DEFAULT_EVAL)
-predict = model_predict(train(load_cases(DEFAULT_TRAIN)))  # baseline_predict の代わり
+predict = model_predict(train(load_train(DEFAULT_TRAIN)))  # baseline_predict の代わり
 report = run_eval(cases, predict, exact_match("category"), meta={"mode": "p04-model"})
 print(summary(cases, report, Price(0.0, 0.0)))  # 07 と同じ形の表示（トークンと費用は 0）
 ```
@@ -271,10 +330,10 @@ print(summary(cases, report, Price(0.0, 0.0)))  # 07 と同じ形の表示（ト
    いちばん良い設定を選び、評価セットで 1 回だけ測ります
 3. 07-5 の表を、04 のモデルを基準にして埋めてください（方法 1 か方法 2）。
    LLM はローカルのモデルで動かします（Ollama が無ければ、04 のモデルの列だけを埋めます）
-4. 03 の成果物（`examples/data/p03/inquiries_clean.csv`、130 件）の本文（`input`）と分類（`category`）で学習し直し、
-   交差検証と 07 の評価セットで測ってください。`response_minutes`（対応にかかった時間）は、問い合わせが届いた時点では分からないので、特徴量に入れません
+4. 言い換えによる漏れの悪い例で、近い組の一覧に出なかった 3 文（テストの `PARAPHRASES` の x1・x2・x4）と、元の評価セットの文を並べて読み、
+   類似度で見つからなかった理由を説明してください。そのうえで、学習データと評価セットを作るときの決まりを 3 行で書きます
 
-- できたことの確かめ方: `uv run pytest` が通る。1 は表と考察、2 は選んだ設定と評価セットの正解率、3 は埋めた表、4 は 2 つの学習データの比較
+- できたことの確かめ方: `uv run pytest` が通る。1 は表と考察、2 は選んだ設定と評価セットの正解率、3 は埋めた表、4 は説明と決まり
 - 目安の時間: 5 時間
 
 解答: [04-4 の解答](answers/04-4.md)
@@ -312,8 +371,9 @@ print(summary(cases, report, Price(0.0, 0.0)))  # 07 と同じ形の表示（ト
         差（3 ポイント）が標準偏差よりずっと小さいので、「同じくらい」と判断します。
         単純で速い、または説明しやすいほうを選び、選んだ理由をレポートに書きます。
 
-5. 04 のモデルの成績が、評価セットでは 96.7%、交差検証では 67.0% でした。評価レポートにどう書きますか。
+5. 学習データを足したら、評価セットの正解率は 80% から 97% に上がったのに、交差検証はほとんど変わりませんでした。何を疑いますか。
 
     ??? note "答え"
-        両方の数字と測った条件を書き、差の理由（学習の件数の違い・評価セットの小ささ・データの書き手が同じこと）を添えます。
-        結論は「評価セットではルールベースより大きく良いが、新しい言い回しでは低めに見積もる」のように、限界も含めて書きます。
+        足したデータに、評価セットの文の言い換えが入っている（言い換えによる漏れ）ことを疑います。
+        完全一致の確かめでは見つからないので、評価セットに近い学習データの組を並べて人が読み、評価セットの成績と交差検証の差が、
+        30 件で測る誤差（標準誤差で 7 ポイントほど）より大きくないかを確かめます。
