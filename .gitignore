@@ -17,3 +17,5 @@ links-report.md
 # ノートブックの途中のファイル・ローカルのモデルやデータ
 .ipynb_checkpoints/
 *.gguf
+# 12 の API の記録・承認待ち・起票先（examples/ で動かすと var/ にできる）
+var/

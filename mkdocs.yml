@@ -105,7 +105,15 @@ nav:
               - 08-2 解答: 08-rag/answers/08-2.md
               - 08-3 解答: 08-rag/answers/08-3.md
               - 08-4 解答: 08-rag/answers/08-4.md
-      - 09 ファインチューニングと最適化: 09-finetuning/index.md
+      - 09 ファインチューニングと最適化:
+          - 09-finetuning/index.md
+          - 09-1 ファインチューニングか RAG か: 09-finetuning/09-1-finetune-or-rag.md
+          - 09-2 SFT・LoRA・QLoRA: 09-finetuning/09-2-sft-lora-qlora.md
+          - 09-3 量子化と GPU のメモリ: 09-finetuning/09-3-quantization-memory.md
+          - 解答:
+              - 09-1 解答: 09-finetuning/answers/09-1.md
+              - 09-2 解答: 09-finetuning/answers/09-2.md
+              - 09-3 解答: 09-finetuning/answers/09-3.md
       - 10 AI エージェント:
           - 10-agents/index.md
           - 10-1 エージェントのループとワークフローの違い: 10-agents/10-1-loop-vs-workflow.md
@@ -120,6 +128,34 @@ nav:
               - 10-4 解答: 10-agents/answers/10-4.md
               - 10-5 解答: 10-agents/answers/10-5.md
   - 安全・運用・実践:
-      - 11 AI の安全と評価: 11-safety/index.md
-      - 12 MLOps とデプロイ: 12-mlops/index.md
-      - 13 実践プロジェクト: 13-project/index.md
+      - 11 AI の安全と評価:
+          - 11-safety/index.md
+          - 11-1 幻覚とベンチマークの読み方: 11-safety/11-1-hallucination-benchmarks.md
+          - 11-2 プロンプトインジェクションと情報漏えい: 11-safety/11-2-prompt-injection.md
+          - 11-3 ガードレールと個人情報の伏せ字: 11-safety/11-3-guardrails-pii.md
+          - 11-4 評価を自動テストにする: 11-safety/11-4-eval-as-tests.md
+          - 解答:
+              - 11-1 解答: 11-safety/answers/11-1.md
+              - 11-2 解答: 11-safety/answers/11-2.md
+              - 11-3 解答: 11-safety/answers/11-3.md
+              - 11-4 解答: 11-safety/answers/11-4.md
+      - 12 MLOps とデプロイ:
+          - 12-mlops/index.md
+          - 12-1 FastAPI で API にする: 12-mlops/12-1-fastapi.md
+          - 12-2 Docker と CI/CD: 12-mlops/12-2-docker-cicd.md
+          - 12-3 クラウドへの配備: 12-mlops/12-3-cloud.md
+          - 12-4 監視とモデル・プロンプトの版管理: 12-mlops/12-4-monitoring-versioning.md
+          - 解答:
+              - 12-1 解答: 12-mlops/answers/12-1.md
+              - 12-2 解答: 12-mlops/answers/12-2.md
+              - 12-3 解答: 12-mlops/answers/12-3.md
+              - 12-4 解答: 12-mlops/answers/12-4.md
+      - 13 実践プロジェクト:
+          - 13-project/index.md
+          - 13-1 要件と設計書: 13-project/13-1-requirements-design.md
+          - 13-2 評価セットと費用の見積もり: 13-project/13-2-evaluation-cost.md
+          - 13-3 配備・レビュー・振り返り: 13-project/13-3-deploy-review.md
+          - 解答:
+              - 13-1 解答: 13-project/answers/13-1.md
+              - 13-2 解答: 13-project/answers/13-2.md
+              - 13-3 解答: 13-project/answers/13-3.md
