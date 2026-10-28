@@ -1,0 +1,24 @@
+# 12-2 手元で、Ollama とエージェントの API を一緒に動かす.
+# examples/ で: docker compose --env-file ../.env up --build
+# 最初の 1 回だけ、モデルを入れる: docker compose exec ollama ollama pull <モデル名>
+name: roadmap-agent
+services:
+  ollama:
+    image: ollama/ollama:${OLLAMA_TAG:-latest} # 本番では版を固定する（OLLAMA_TAG）
+    volumes:
+      - ollama:/root/.ollama # 入れたモデルを、作り直しても残す
+  agent:
+    build: .
+    environment:
+      AGENT_MODEL: ${AGENT_MODEL:?AGENT_MODEL に、ツールに対応したモデル名を書いてください}
+      OLLAMA_BASE_URL: http://ollama:11434 # 同じ compose の中では、サービス名で呼べる
+      APPROVER_TOKEN: ${APPROVER_TOKEN:-} # 空なら、承認の API は使えない
+    ports:
+      - "127.0.0.1:8000:8000" # 自分の PC からだけ呼べるようにする
+    volumes:
+      - agent-data:/app/var # 記録（requests.jsonl）・承認待ち・起票先
+    depends_on:
+      - ollama
+volumes:
+  ollama:
+  agent-data:
