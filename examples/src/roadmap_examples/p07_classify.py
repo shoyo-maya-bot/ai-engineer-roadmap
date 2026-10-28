@@ -1,7 +1,7 @@
 """07 の成果物: 問い合わせの分類を LLM でやり直し、比べる基準と同じ評価セットで、精度と費用を比べる.
 
-比べる基準は、いまは「仮のルールベース分類」（キーワードで振り分ける）. 04 の分類モデルができたら、
-`baseline_predict` を 04 のモデルの予測に差し替える（評価セットと採点はそのまま）.
+比べる基準は 04 の分類モデル（04 の結果のファイルを --compare に渡す. 差し替え方は 04-4）.
+--mode baseline は、04 を飛ばした人のための「仮のルールベース分類」（キーワードで振り分ける）.
 
 使い方（examples/ で）:
   uv run python -m roadmap_examples.p07_classify --mode baseline --out results-baseline.jsonl
@@ -44,7 +44,7 @@ from roadmap_examples.p07_structured import CLASSIFY_SCHEMA, ask_json
 
 DEFAULT_EVAL = Path(__file__).resolve().parents[2] / "data" / "p07" / "inquiries.jsonl"
 
-# 仮のルールベース分類（04 の結果ができたら差し替える）. 上から順に、最初に当たったものにする
+# 仮のルールベース分類（04 を飛ばした人の基準. 04 のモデルへの差し替え方は 04-4）. 上から順に、最初に当たったものにする
 RULES: list[tuple[str, tuple[str, ...]]] = [
     ("bug", ("エラー", "動かない", "表示されない", "真っ白", "落ちる", "固まる")),
     ("billing", ("請求", "支払", "領収書", "決済", "引き落とし", "返金")),
