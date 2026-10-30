@@ -40,6 +40,14 @@ def test_constraints_and_workflow_ruff_are_checked_when_present(repo):
     ]
 
 
+def test_uv_image_in_dockerfile_is_checked_when_present(repo):
+    repo.write("examples/Dockerfile", "FROM python\nCOPY --from=ghcr.io/astral-sh/uv:0.8.17@sha256:00 /uv /bin/\n")
+    assert errors(repo) == []
+    repo.write("examples/Dockerfile", "COPY --from=ghcr.io/astral-sh/uv:0.9.0 /uv /bin/\n")
+    errs = errors(repo)
+    assert len(errs) == 1 and "examples/Dockerfile の ghcr.io/astral-sh/uv は 0.9.0" in errs[0], errs
+
+
 def test_missing_key_and_unreadable_files(repo):
     repo.write("mkdocs.yml", repo.read("mkdocs.yml").replace('    uv: "0.8.17"\n', ""))
     (repo.root / "examples/uv.lock").unlink()
